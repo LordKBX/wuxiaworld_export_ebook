@@ -48,10 +48,11 @@ def clean(file_name_in, file_name_out, start):
 	file.write('<html xmlns="http://www.w3.org/1999/xhtml">')
 	file.write("\n<head>")
 	file.write("\n<title>" + chapter_title + "</title>")
+	file.write("\n"+'<link href="common.css" rel="stylesheet" type="text/css"/>')
 	file.write("\n</head>")
 	file.write("\n<body>")
 	file.write("\n<h1>" + chapter_title + "</h1>")
-	file.write(str(soup))
+	file.write(str(soup).replace('<p></p>', '').replace('<p><br></p>', '').replace('<hr>', ''))
 	file.write("\n</body>")
 	file.write("\n</html>")
 	os.remove(file_name_in)
@@ -131,6 +132,7 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 			fileName = author + ' - ' + novelname + " - {}".format(book)
 		else:
 			fileName = author + ' - ' + novelname + " - {} - {}-{}".format(book, chapter_s, chapter_e)
+	fileName = fileName.replace(':',',')
 	epub = zipfile.ZipFile("./export/" + fileName + ".epub", "w")
 	# The first file must be named "mimetype"
 	epub.writestr("mimetype", "application/epub+zip")
@@ -157,6 +159,11 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 			<manifest>
 				%(manifest)s
 				<item href="cover.jpg" id="cover" media-type="image/jpeg" properties="cover-image"/>
+				<item href="common.css" id="commoncss" media-type="text/css"/>
+				<item href="Century-Gothic.ttf" id="id1" media-type="application/font-sfnt"/>
+				<item href="Century-Gothic-Bold.ttf" id="id1" media-type="application/font-sfnt"/>
+				<item href="Century-Gothic-Bold-Italic.ttf" id="id1" media-type="application/font-sfnt"/>
+				<item href="Century-Gothic-Italic.ttf" id="id1" media-type="application/font-sfnt"/>
 			</manifest>
 			<spine>
 				<itemref idref="toc"/>
@@ -194,6 +201,7 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 		<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
 		<head>
 			<title>%(novelname)s</title>
+			<link href="common.css" rel="stylesheet" type="text/css"/>
 		</head>
 		<body>
 			<section class="frontmatter TableOfContents">
@@ -216,10 +224,17 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 			</li>''' % (i, html_files[i], chapter)
 
 	epub.writestr("OEBPS/toc.xhtml", toc_start % {"novelname": novelname, "toc_mid": toc_mid, "toc_end": toc_end})
+	
 	epub.write("./tmp/cover.jpg", "OEBPS/cover.jpg")
-	epub.close()
 	os.remove("./tmp/cover.jpg")
-
+	
+	epub.write("./ressources/common.css", "OEBPS/common.css")
+	epub.write("./ressources/Century-Gothic.ttf", "OEBPS/Century-Gothic.ttf")
+	epub.write("./ressources/Century-Gothic-Bold.ttf", "OEBPS/Century-Gothic-Bold.ttf")
+	epub.write("./ressources/Century-Gothic-Bold-Italic.ttf", "OEBPS/Century-Gothic-Bold-Italic.ttf")
+	epub.write("./ressources/Century-Gothic-Italic.ttf", "OEBPS/Century-Gothic-Italic.ttf")
+	
+	epub.close()
 
 	#removes all the temporary files
 	for x in html_files:
