@@ -1,8 +1,3 @@
-# Attention
-Last huge update coming in the next couple of weeks. After the update I won't add new features and will only maintain functionality of the program.
-So if you have a suggestion that you think should be implemented, open up a new Issue or write me an E-Mail to  	bloodviolet@bloodviolet.tech.
-The last update will include a CSS Stylesheet that will hopefully make them look like they were professionally edited. So keep an eye out  for upcomming updates :)
-
 # wuxiaworld_export_ebook
 This Python script will download chapters from novels availaible on wuxiaworld.com and saves them into the .epub format.
 Fork based on [Wuxiaworld-2-eBook](https://github.com/MakeYourLifeEasier/Wuxiaworld-2-eBook).
