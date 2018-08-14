@@ -35,3 +35,7 @@ img{max-width:100%;height:auto;display:block;margin:0 auto;}
 .bitalic{font-family:"Century Gothic", sans-serif;font-style: italic;font-weight:bold;}
 
 .credits{position:fixed;bottom:10px;left:10px;}
+
+ol{background:#DD6600;padding-top:15px;padding-bottom:15px;}
+ol li{padding:5px;width:calc(100% - 20px);color:#000000;}
+ol li a{color:#000000;}
