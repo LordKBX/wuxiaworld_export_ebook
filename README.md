@@ -10,6 +10,7 @@ To run this script you'll need to have Python >=3.4.x installed which you can fi
 
 - Download and save you favorite Novels from wuxiaworld.com into a .epub file
 - Automatically adds some metadata like author, title and cover
+- Customizable style by editing the default ressources/common.css(injection of others fonts not customised yet)
 
 ### Prerequisites
 
