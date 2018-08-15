@@ -46,14 +46,6 @@ If you have troube with missing text in some Novels use [the legacy console appl
 
 If you come across bug's or suggestion's for future updates don't hesitate to open up a "new Issue" in the issue tab
 
-Novels that are not included:
-
-- Heavenly Jewel Change
-- I Reincarnated for Nothing
-- Red Storm
-- Terror Infinity
-- Unrivaled Tang Sect
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
