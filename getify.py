@@ -126,14 +126,14 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 		os.mkdir('./export')
 	fileName = ''
 	if book is None:
-		fileName = author + ' - ' + novelname + " - {}-{}".format(chapter_s, chapter_e)
+		fileName = novelname + " - {}-{}".format(chapter_s, chapter_e)
 	else:
 		if chapter_s is None:
-			fileName = author + ' - ' + novelname + " - {}".format(book)
+			fileName = novelname + " - {}".format(book)
 		else:
-			fileName = author + ' - ' + novelname + " - {} - {}-{}".format(book, chapter_s, chapter_e)
+			fileName = novelname + " - {} - {}-{}".format(book, chapter_s, chapter_e)
 	fileName = fileName.replace(':',',')
-	epub = zipfile.ZipFile("./export/" + fileName + ".epub", "w")
+	epub = zipfile.ZipFile("./export/" + author + ' - ' + fileName + ".epub", "w")
 	# The first file must be named "mimetype"
 	epub.writestr("mimetype", "application/epub+zip")
 
@@ -151,6 +151,9 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	# The index file is another XML file, living per convention
 	# in OEBPS/Content.xml
 	uniqueid = uuid.uuid1().hex
+	file1  = open("./ressources/loading_fonts.txt", "r")
+	font = file1.read()
+	file1.close()
 	index_tpl = '''<package version="3.1"
 	xmlns="http://www.idpf.org/2007/opf" unique-identifier="''' + uniqueid + '''">
 			<metadata>
@@ -160,10 +163,10 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 				%(manifest)s
 				<item href="cover.jpg" id="cover" media-type="image/jpeg" properties="cover-image"/>
 				<item href="common.css" id="commoncss" media-type="text/css"/>
-				<item href="Century-Gothic.ttf" id="id1" media-type="application/font-sfnt"/>
-				<item href="Century-Gothic-Bold.ttf" id="id1" media-type="application/font-sfnt"/>
-				<item href="Century-Gothic-Bold-Italic.ttf" id="id1" media-type="application/font-sfnt"/>
-				<item href="Century-Gothic-Italic.ttf" id="id1" media-type="application/font-sfnt"/>
+				<item href="Regular.ttf" id="id1" media-type="application/font-sfnt"/>
+				<item href="Bold.ttf" id="id1" media-type="application/font-sfnt"/>
+				<item href="Bold-Italic.ttf" id="id1" media-type="application/font-sfnt"/>
+				<item href="Italic.ttf" id="id1" media-type="application/font-sfnt"/>
 			</manifest>
 			<spine>
 				<itemref idref="toc"/>
@@ -228,12 +231,10 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	epub.write("./tmp/cover.jpg", "OEBPS/cover.jpg")
 	os.remove("./tmp/cover.jpg")
 	
-	file1  = open("./ressources/loading_fonts.txt", "r")
+	
 	file2  = open("./ressources/common.css", "r")
 	file3  = open("./tmp/common.css", "w")
-	font = file1.read()
 	ccss = file2.read()
-	file1.close()
 	file2.close()
 	ccss = ccss.replace('<FONT>', font)
 	file3.write(ccss) 
