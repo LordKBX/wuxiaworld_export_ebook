@@ -9,6 +9,7 @@ import os
 import os.path
 import sys
 import sqlite3 as sql
+import traceback
 
 try:
 	from Tkinter import *
@@ -66,6 +67,25 @@ def vp_start_gui():
 	except: {}
 	try: top.TComboboxFullExport.current(1)
 	except: {}
+	try:
+		file1  = open("./ressources/loading_fonts.txt", "r")
+		curFont = file1.read()
+		file1.close()
+		fonts = []
+		index = 0
+		max = 0
+		for x in os.listdir('./ressources/fonts'):
+			print(x)
+			if os.path.isdir('./ressources/fonts/'+x): 
+				fonts.append(x)
+				if x == curFont:
+					index = max
+				max += 1
+		print(fonts)
+		top.TComboboxStyleFont["values"] = fonts
+		top.TComboboxStyleFont.current(index)
+	except: 
+		traceback.print_exc()
 	
 	init_inputs()
 	root.mainloop()
@@ -91,14 +111,12 @@ def init_inputs():
 	top.TComboboxBook["values"] = []
 	top.TComboboxStartingChapter["values"] = []
 	top.TComboboxEndingChapter["values"] = []
-	#top.EntryAltFileName.delete(0, len(top.EntryAltFileName.get()) - 1)
 	
 	top.TComboboxExportMode.configure(state = "disabled")
 	top.TComboboxFullExport.configure(state = "disabled")
 	top.TComboboxBook.configure(state = "disabled")
 	top.TComboboxStartingChapter.configure(state = "disabled")
 	top.TComboboxEndingChapter.configure(state = "disabled")
-	#top.EntryAltFileName.configure(state = "disabled")
 			
 def novel_change(index, value, op):
 	global top, novel, cursor, data_novel, root
@@ -161,12 +179,10 @@ def export_mode_change(index, value, op):
 		top.TComboboxBook["values"] = []
 		top.TComboboxStartingChapter["values"] = []
 		top.TComboboxEndingChapter["values"] = []
-		#top.EntryAltFileName.delete(0, len(top.EntryAltFileName.get()) - 1)
 		
 		top.TComboboxBook.configure(state = "disabled")
 		top.TComboboxStartingChapter.configure(state = "disabled")
 		top.TComboboxEndingChapter.configure(state = "disabled")
-		#top.EntryAltFileName.configure(state = "disabled")
 		
 def book_change(index, value, op):
 	global top, novel, cursor, data_novel
@@ -189,6 +205,13 @@ def book_change(index, value, op):
 	top.TComboboxStartingChapter.configure(state = "readonly")
 	top.TComboboxEndingChapter.configure(state = "readonly")
 	
+def font_change(index, value, op):
+	global top
+	font = top.TComboboxStyleFont.get()
+	file1  = open("./ressources/loading_fonts.txt", "w")
+	file1.write(font) 
+	file1.close()
+	
 def quit():
 	global loop
 	if loop is True: return
@@ -208,7 +231,7 @@ def generate():
 	top.TComboboxBook.configure(state = "disabled")
 	top.TComboboxStartingChapter.configure(state = "disabled")
 	top.TComboboxEndingChapter.configure(state = "disabled")
-	#top.EntryAltFileName.configure(state = "disabled")
+	top.TComboboxStyleFont.configure(state = "disabled")
 	root.config(cursor="wait")
 	
 	def callback():
@@ -338,6 +361,7 @@ def generate_end():
 	top.TComboboxNovel.configure(state = "readonly")
 	top.TComboboxExportMode.configure(state = "readonly")
 	top.TComboboxFullExport.configure(state = "readonly")
+	top.TComboboxStyleFont.configure(state = "readonly")
 	if top.TComboboxFullExport.get() == 'No':
 		if book != 'Book 0':
 			top.TComboboxBook.configure(state = "readonly")
@@ -528,28 +552,28 @@ class New_Toplevel:
 		self.TComboboxEndingChapter.configure(state="readonly")
 
 		
-		#self.LabelAltFileName = Label(top)
-		#self.LabelAltFileName.place(relx=0.02, rely=0.61, height=21, width=174)
-		#self.LabelAltFileName.configure(activebackground="#f9f9f9")
-		#self.LabelAltFileName.configure(activeforeground="black")
-		#self.LabelAltFileName.configure(anchor=W)
-		#self.LabelAltFileName.configure(background="#a8a8a8")
-		#self.LabelAltFileName.configure(disabledforeground="#a3a3a3")
-		#self.LabelAltFileName.configure(foreground="#000000")
-		#self.LabelAltFileName.configure(highlightbackground="#d9d9d9")
-		#self.LabelAltFileName.configure(highlightcolor="black")
-		#self.LabelAltFileName.configure(justify=LEFT)
-		#self.LabelAltFileName.configure(padx="3")
-		#self.LabelAltFileName.configure(text='''Alternative file name''')
+		self.LabelStyleFont = Label(top)
+		self.LabelStyleFont.place(relx=0.02, rely=0.61, height=21, width=174)
+		self.LabelStyleFont.configure(activebackground="#f9f9f9")
+		self.LabelStyleFont.configure(activeforeground="black")
+		self.LabelStyleFont.configure(anchor=W)
+		self.LabelStyleFont.configure(background="#a8a8a8")
+		self.LabelStyleFont.configure(disabledforeground="#a3a3a3")
+		self.LabelStyleFont.configure(foreground="#000000")
+		self.LabelStyleFont.configure(highlightbackground="#d9d9d9")
+		self.LabelStyleFont.configure(highlightcolor="black")
+		self.LabelStyleFont.configure(justify=LEFT)
+		self.LabelStyleFont.configure(padx="3")
+		self.LabelStyleFont.configure(text='''Style Font''')
 
-		#self.EntryAltFileName = Entry(top)
-		#self.EntryAltFileName.place(relx=0.32, rely=0.61,height=20, relwidth=0.66)
-		#self.EntryAltFileName.configure(background="white")
-		#self.EntryAltFileName.configure(disabledforeground="#a3a3a3")
-		#self.EntryAltFileName.configure(font="TkFixedFont")
-		#self.EntryAltFileName.configure(foreground="#000000")
-		#self.EntryAltFileName.configure(insertbackground="black")
-		#self.EntryAltFileName.configure(width=394)
+		styleFont = StringVar()
+		styleFont.trace("w", font_change)
+		self.TComboboxStyleFont = ttk.Combobox(top)
+		self.TComboboxStyleFont.place(relx=0.32, rely=0.61, relheight=0.06, relwidth=0.66)
+		self.TComboboxStyleFont.configure(textvariable=styleFont)
+		self.TComboboxStyleFont.configure(width=393)
+		self.TComboboxStyleFont.configure(takefocus="")
+		self.TComboboxStyleFont.configure(state="readonly")
 		
 		
 		self.ButtonExit = Button(top)

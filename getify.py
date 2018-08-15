@@ -228,11 +228,23 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	epub.write("./tmp/cover.jpg", "OEBPS/cover.jpg")
 	os.remove("./tmp/cover.jpg")
 	
-	epub.write("./ressources/common.css", "OEBPS/common.css")
-	epub.write("./ressources/Century-Gothic.ttf", "OEBPS/Century-Gothic.ttf")
-	epub.write("./ressources/Century-Gothic-Bold.ttf", "OEBPS/Century-Gothic-Bold.ttf")
-	epub.write("./ressources/Century-Gothic-Bold-Italic.ttf", "OEBPS/Century-Gothic-Bold-Italic.ttf")
-	epub.write("./ressources/Century-Gothic-Italic.ttf", "OEBPS/Century-Gothic-Italic.ttf")
+	file1  = open("./ressources/loading_fonts.txt", "r")
+	file2  = open("./ressources/common.css", "r")
+	file3  = open("./tmp/common.css", "w")
+	font = file1.read()
+	ccss = file2.read()
+	file1.close()
+	file2.close()
+	ccss = ccss.replace('<FONT>', font)
+	file3.write(ccss) 
+	file3.close()
+	
+	epub.write("./tmp/common.css", "OEBPS/common.css")
+	os.remove("./tmp/common.css")
+	epub.write("./ressources/fonts/"+font+"/Regular.ttf", "OEBPS/Regular.ttf")
+	epub.write("./ressources/fonts/"+font+"/Bold.ttf", "OEBPS/Bold.ttf")
+	epub.write("./ressources/fonts/"+font+"/Bold-Italic.ttf", "OEBPS/Bold-Italic.ttf")
+	epub.write("./ressources/fonts/"+font+"/Italic.ttf", "OEBPS/Italic.ttf")
 	
 	epub.close()
 
