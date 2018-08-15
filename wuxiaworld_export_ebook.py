@@ -5,6 +5,8 @@
 # In conjunction with Tcl version 8.6
 #	Aug 13, 2018 03:57:27 PM
 
+import os
+import os.path
 import sys
 import sqlite3 as sql
 
@@ -22,6 +24,7 @@ except ImportError:
 
 import interface_support
 import novel_data
+import database_updator
 import getify
 from urllib.error import HTTPError, URLError
 import time
@@ -43,6 +46,10 @@ def vp_start_gui():
 	interface_support.set_Tk_var()
 	top = New_Toplevel (root)
 	interface_support.init(root, top)
+	
+	if time.time() - float(os.path.getmtime("novels.db")) >= 43200.0: #test 43200 = 12h
+		print('Updating Novel Database')
+		database_updator.start()
 	
 	conn = sql.connect("novels.db")
 	cursor = conn.cursor()
