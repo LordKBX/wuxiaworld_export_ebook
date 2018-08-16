@@ -16,7 +16,9 @@ To run this script you'll need to have Python >=3.4.x installed which you can fi
 ### Prerequisites
 
 As mentioned before this script was written for Python >=3.4.x.
-Additionally PyQt4, lxml and Beautifulsoup4 are required.
+
+Additionally the packages PyQt4, lxml and Beautifulsoup4 are required.
+
 To install all dependencies just use the console to navigate into the project folder and write
 
 ```
