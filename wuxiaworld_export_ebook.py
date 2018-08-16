@@ -12,7 +12,7 @@ import sqlite3 as sql
 import traceback
 
 from tkinter import *
-import tkinter.ttk as ttk	
+import tkinter.ttk as ttk
 import tkinter.font
 import tkinter.messagebox
 
@@ -137,6 +137,8 @@ def novel_change(index, value, op):
 	export_mode = top.TComboboxExportMode.get()
 	export_full = top.TComboboxFullExport.get()
 	if novel != re:
+		top.LabelStatusBar2.configure(text="")
+		top.LabelStatusBar2.configure(background="#aaaaaa")
 		root.config(cursor="wait")
 		novel = re
 		print(re)
@@ -186,6 +188,8 @@ def export_mode_change(index, value, op):
 		top.TComboboxBook.configure(state = "disabled")
 		top.TComboboxStartingChapter.configure(state = "disabled")
 		top.TComboboxEndingChapter.configure(state = "disabled")
+	top.LabelStatusBar2.configure(text="")
+	top.LabelStatusBar2.configure(background="#aaaaaa")
 		
 def book_change(index, value, op):
 	global top, novel, cursor, data_novel
@@ -207,10 +211,14 @@ def book_change(index, value, op):
 	top.TComboboxEndingChapter.current(len(chapters) - 1)
 	top.TComboboxStartingChapter.configure(state = "readonly")
 	top.TComboboxEndingChapter.configure(state = "readonly")
+	top.LabelStatusBar2.configure(text="")
+	top.LabelStatusBar2.configure(background="#aaaaaa")
 	
 def font_change(index, value, op):
 	global top, root
 	curFont = top.TComboboxStyleFont.get()
+	top.LabelStatusBar2.configure(text="")
+	top.LabelStatusBar2.configure(background="#aaaaaa")
 	root.after(100, font_change_pt2(curFont))
 	
 def font_change_pt2(curFont):
@@ -239,6 +247,9 @@ def generate():
 	loop = True
 	print('generate_start')
 	
+	
+	top.LabelStatusBar2.configure(text="Task launched at {}".format(time.asctime()))
+	top.LabelStatusBar2.configure(background="#aaaaaa")
 	top.TComboboxNovel.configure(state = "disabled")
 	top.TComboboxExportMode.configure(state = "disabled")
 	top.TComboboxFullExport.configure(state = "disabled")
@@ -262,7 +273,6 @@ def generate():
 		msg1 = ''
 		msg2 = ''
 		msg3 = ''
-		msg4 = ''
 		bulk_list = []
 		file_list = []
 		if export_full == 'No':
@@ -287,15 +297,13 @@ def generate():
 								if bl['name'] == chapter_end: good = False
 				print(bulk_list)
 					
-			msg2 = chapter_start
-			msg3 = '=>'
-			msg4 = chapter_end
+			bookName = chapter_start + "<br/>=><br/>" + chapter_end
 			
 			cover = data_novel['cover']
 			if cover[0] == '/':
 				cover = 'https://cdn.wuxiaworld.com' + cover
 			
-			getify.cover_generator(data_novel['cover'], msg1, msg2, msg3, msg4)
+			getify.cover_generator(data_novel['cover'], novel, bookName, data_novel['autor'])
 			
 			for x in range(len(bulk_list)):
 				ti = bulk_list[x]['url'].split('/')
@@ -321,7 +329,7 @@ def generate():
 				for tome in bookList:
 					bulk_list = []
 					msg1 = tome
-					getify.cover_generator(data_novel['cover'], tome, '', '', '')
+					getify.cover_generator(data_novel['cover'], novel, tome, data_novel['autor'])
 					for bok in data_novel['books'][tome]:
 						bulk_list.append(bok)
 					file_list = []
@@ -346,7 +354,7 @@ def generate():
 				for block in data_novel['alt_books']:
 					bulk_list = []
 					file_list = []
-					getify.cover_generator(data_novel['cover'], block['title'], '', '', '')
+					getify.cover_generator(data_novel['cover'], novel, block['title'], data_novel['autor'])
 					for bl in block['chapters']:
 						good = True
 						bulk_list.append(bl)
@@ -373,7 +381,7 @@ def generate():
 def generate_end():
 	global top, novel, cursor, data_novel, root, loop
 	print('generate_end')
-	top.LabelStatusBar2.configure(text="Task finished{}".format(time.asctime()))
+	top.LabelStatusBar2.configure(text="Task finished at {}".format(time.asctime()))
 	top.LabelStatusBar2.configure(background="#4fa839")
 	book = top.TComboboxBook.get()
 	top.TComboboxNovel.configure(state = "readonly")

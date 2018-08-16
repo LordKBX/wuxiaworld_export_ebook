@@ -16,8 +16,9 @@ To run this script you'll need to have Python >=3.4.x installed which you can fi
 ### Prerequisites
 
 As mentioned before this script was written for Python >=3.4.x.
-Additionally the Python image library (Pillow), lxml and Beautifulsoup4 are required.
+Additionally PyQt4, lxml and Beautifulsoup4 are required.
 To install all dependencies just use the console to navigate into the project folder and write
+For PyQt4 on windows use the package at this address https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4
 
 ```
 pip install -r requirements.txt

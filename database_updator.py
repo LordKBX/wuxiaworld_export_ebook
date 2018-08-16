@@ -50,7 +50,11 @@ def insert_novel(name, url):
 	else:
 		fileHandle = open(filename, "r", encoding = "utf8")
 		soup = BeautifulSoup(fileHandle, 'html.parser')
-		img = soup.find(class_='seriesimg').find('img').get('src')
+		exclude_list = ['7 Killers']
+		cover_list = {'7 Killers': 'https://cdn.wuxiaworld.com/images/covers/7k.png'}
+		if name in exclude_list:
+			img = cover_list[name]
+		else: img = soup.find(class_='seriesimg').find('img').get('src')
 		autors = ''
 		dom_authors = soup.find(id='showauthors').find_all('a')
 		for aut in dom_authors:

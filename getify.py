@@ -5,9 +5,9 @@ import os.path
 import zipfile
 import time
 import sys
-from PIL import Image
-from PIL import ImageFont
-from PIL import ImageDraw
+import traceback
+from subprocess import call
+
 from bs4 import BeautifulSoup
 import uuid
 
@@ -88,30 +88,27 @@ def update_progress(progress):
 	hard to read."""
 
 
-def cover_generator(src, msg1, msg2, msg3, msg4):
+def cover_generator(src, novel, book_name, author):	
 	if os.path.isdir('./tmp') is False:
 		os.mkdir('./tmp')
-	urllib.request.urlretrieve(src, "./tmp/cover.jpg")
-	img = Image.open("./tmp/cover.jpg")
-	draw = ImageDraw.Draw(img)
-	thefont = ImageFont.truetype("arial.ttf", 28)
-	thefont2 = ImageFont.truetype("arial.ttf", 50)
-	#Get's the average complementary color of the picutre
-	W, H = (400, 600)
-	img2 = img.resize((1, 1))
-	redc = 255 - img2.getpixel((0, 0))[0]
-	greebc = 255 - img2.getpixel((0, 0))[1]
-	bluec = 255 - img2.getpixel((0, 0))[2]
-	complementary = (redc, greebc, bluec)
-	w, h = draw.textsize(msg1, font=thefont)
-	draw.text(((W - w) / 2, 432), msg1, complementary, font = thefont)
-	w, h = draw.textsize(msg2, font=thefont)
-	draw.text(((W - w) / 2, 465), msg2, complementary, font = thefont)
-	w, h = draw.textsize(msg3, font=thefont2)
-	draw.text(((W - w) / 2, 500), msg3, complementary, font = thefont2)
-	w, h = draw.textsize(msg4, font=thefont)
-	draw.text(((W - w) / 2, 550), msg4, complementary, font = thefont)
-	img.save("./tmp/cover.jpg")
+		
+	urllib.request.urlretrieve(src, "./tmp/origin_cover.jpg")
+	
+	file2  = open("./ressources/jacket.xhtml", "r")
+	file3  = open("./tmp/jacket.xhtml", "wb")
+	jacket = file2.read()
+	file2.close()
+	jacket = jacket.replace('{novel}', novel).replace('{title}', book_name).replace('{author}', author)
+	file3.write(jacket.encode('utf-8')) 
+	file3.close()
+		
+	try:
+		call([sys.executable, "webkit2png_exec.py", "-o", "tmp/cover.png", "./tmp/jacket.xhtml"])
+	except RuntimeError as e:
+		traceback.print_exc()
+		
+	os.remove("./tmp/origin_cover.jpg")
+	os.remove("./tmp/jacket.xhtml")
 
 
 """ Saves downloaded xhtml files into the epub format while also
@@ -161,7 +158,7 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 			</metadata>
 			<manifest>
 				%(manifest)s
-				<item href="cover.jpg" id="cover" media-type="image/jpeg" properties="cover-image"/>
+				<item href="cover.png" id="cover" media-type="image/png" properties="cover-image"/>
 				<item href="common.css" id="commoncss" media-type="text/css"/>
 				<item href="Regular.ttf" id="id1" media-type="application/font-sfnt"/>
 				<item href="Bold.ttf" id="id1" media-type="application/font-sfnt"/>
@@ -228,8 +225,8 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 
 	epub.writestr("OEBPS/toc.xhtml", toc_start % {"novelname": novelname, "toc_mid": toc_mid, "toc_end": toc_end})
 	
-	epub.write("./tmp/cover.jpg", "OEBPS/cover.jpg")
-	os.remove("./tmp/cover.jpg")
+	epub.write("./tmp/cover.png", "OEBPS/cover.png")
+	os.remove("./tmp/cover.png")
 	
 	
 	file2  = open("./ressources/common.css", "r")
