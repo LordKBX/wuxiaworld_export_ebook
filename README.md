@@ -1,6 +1,6 @@
 # wuxiaworld_export_ebook
 This Python script will download chapters from novels availaible on wuxiaworld.com and saves them into the .epub format.
-Fork based on [Wuxiaworld-2-eBook](https://github.com/MakeYourLifeEasier/Wuxiaworld-2-eBook).
+Based on a Fork of [Wuxiaworld-2-eBook](https://github.com/MakeYourLifeEasier/Wuxiaworld-2-eBook).
 
 ## Getting Started
 
