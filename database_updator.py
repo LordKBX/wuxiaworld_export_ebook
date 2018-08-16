@@ -40,19 +40,21 @@ def insert_novel(name, url):
 		download(down, filename)
 	except HTTPError as e:
 		# Return code error (e.g. 404, 501, ...)
-		print('URL: {}, HTTPError: {} - {}'.format(down, e.code, e.reason))
-		if e.code == 404: 
-			print('alt mode record')
+		if e.code == 404:
 			insert_novel2(name, url)
+		else:
+			print('URL: {}, HTTPError: {} - {}'.format(down, e.code, e.reason))
 	except URLError as e:
 		# Not an HTTP-specific error (e.g. connection refused)
 		print('URL: {}, URLError: {}'.format(down, e.reason))
 	else:
 		fileHandle = open(filename, "r", encoding = "utf8")
 		soup = BeautifulSoup(fileHandle, 'html.parser')
-		exclude_list = ['7 Killers']
-		cover_list = {'7 Killers': 'https://cdn.wuxiaworld.com/images/covers/7k.png'}
-		if name in exclude_list:
+		cover_list = {
+			'7 Killers': 'https://image.ibb.co/fAgv6U/7k.png',
+			'Warlock of the Magus World': 'https://image.ibb.co/gEOTt9/600.jpg'
+			}
+		if name in cover_list:
 			img = cover_list[name]
 		else: img = soup.find(class_='seriesimg').find('img').get('src')
 		autors = ''

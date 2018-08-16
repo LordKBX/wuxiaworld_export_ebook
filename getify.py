@@ -223,7 +223,7 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 			<a href="%s">%s</a>
 			</li>''' % (i, html_files[i], chapter)
 
-	epub.writestr("OEBPS/toc.xhtml", toc_start % {"novelname": novelname, "toc_mid": toc_mid, "toc_end": toc_end})
+	epub.writestr("OEBPS/toc.xhtml", toc_start % {"novelname": fileName, "toc_mid": toc_mid, "toc_end": toc_end})
 	
 	epub.write("./tmp/cover.png", "OEBPS/cover.png")
 	os.remove("./tmp/cover.png")
