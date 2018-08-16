@@ -13,12 +13,21 @@ import os
 import os.path
 import sqlite3 as sql
 from bs4 import BeautifulSoup
-import copy
+import re
 
 
 
 conn = None
 cursor = None
+alt_cover_list = {
+			'7 Killers': 'https://image.ibb.co/fAgv6U/7k.png',
+			'Warlock of the Magus World': 'https://image.ibb.co/gEOTt9/600.jpg',
+			'Overthrowing Fate': 'https://image.ibb.co/m6SWyK/otf.png',
+			'Legends of Ogre Gate': 'https://image.ibb.co/myNLse/loog_1.png',
+			'Blue Phoenix': 'https://image.ibb.co/i4q6Xe/bp_1.png',
+			'The Divine Elements': 'https://image.ibb.co/ceG58K/tde_1.png',
+			'Condemning the Heavens': 'https://image.ibb.co/mTK8TK/cth_1.png'
+			}
 
 def download(link, file_name):
 	url = urllib.request.Request(
@@ -33,9 +42,17 @@ def download(link, file_name):
 		 shutil.copyfileobj(response, out_file)
 		 
 def insert_novel(name, url):
-	global conn, cursor
+	global conn, cursor, alt_cover_list
 	filename = "./tmp/novel_"+urllib.parse.quote(name)+".html"
-	down = "https://www.novelupdates.com/series/"+name.replace("&", 'and').replace("'", '').replace(" ", '-')+"/"
+	exception_names_list = {
+		'Legend of the Dragon King': 'the-legend-of-the-dragon-king',
+		'The Unrivaled Tang Sect': 'douluo-dalu-2-the-unrivaled-tang-sect',
+		'Desolate Era': 'the-desolate-era',
+		'Stellar Transformations': 'stellar-transformation'
+	}
+	if name in exception_names_list:
+		down = "https://www.novelupdates.com/series/"+exception_names_list[name]+"/"
+	else: down = "https://www.novelupdates.com/series/"+name.lower().replace("&", 'and').replace("'", '').replace(" ", '-')+"/"
 	try:
 		download(down, filename)
 	except HTTPError as e:
@@ -50,12 +67,8 @@ def insert_novel(name, url):
 	else:
 		fileHandle = open(filename, "r", encoding = "utf8")
 		soup = BeautifulSoup(fileHandle, 'html.parser')
-		cover_list = {
-			'7 Killers': 'https://image.ibb.co/fAgv6U/7k.png',
-			'Warlock of the Magus World': 'https://image.ibb.co/gEOTt9/600.jpg'
-			}
-		if name in cover_list:
-			img = cover_list[name]
+		if name in alt_cover_list:
+			img = alt_cover_list[name]
 		else: img = soup.find(class_='seriesimg').find('img').get('src')
 		autors = ''
 		dom_authors = soup.find(id='showauthors').find_all('a')
@@ -68,7 +81,7 @@ def insert_novel(name, url):
 		os.remove(filename)
 		 
 def insert_novel2(name, url):
-	global conn, cursor
+	global conn, cursor, alt_cover_list
 	filename = "./tmp/novel_"+urllib.parse.quote(name)+"_2.html"
 	down = url
 	try:
@@ -81,14 +94,23 @@ def insert_novel2(name, url):
 		fileHandle = open(filename, "r", encoding = "utf8")
 		soup = BeautifulSoup(fileHandle, 'html.parser')
 		nov = soup.find(class_='media media-novel-index')
-		img = nov.find('img').get('src')
+		if name in alt_cover_list:
+			img = alt_cover_list[name]
+		else: img = nov.find('img').get('src')
 		autors = ''
 		dom_authors = nov.find_all('p')
+		dom_authors += nov.find_all('dl')
 		for aut in dom_authors:
-			if aut.string is not None:
-				if 'Author:' in aut.string:
-					if autors != '': autors += ', '
-					autors += aut.string.replace('Author:', '').strip()
+			if len(aut.contents) >= 1:
+				strmade = ''
+				for piece in aut.contents:
+					if piece.string is not None:
+						strmade += piece.string
+				if 'Author:' in strmade or 'Translator:' in strmade:
+					clean = strmade.replace('Author:', '').replace('Translator:', '').replace("\n", '').replace("\r", '').replace("\t", '').strip()
+					if clean not in autors:
+						if autors != '': autors += ', '
+						autors += clean
 		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover) VALUES(?,?,?,?)", (name, url, autors, img))
 		conn.commit()
 		fileHandle.close();
