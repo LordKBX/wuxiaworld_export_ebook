@@ -11,17 +11,10 @@ import sys
 import sqlite3 as sql
 import traceback
 
-try:
-	from Tkinter import *
-except ImportError:
-	from tkinter import *
-
-try:
-	import ttk
-	py3 = False
-except ImportError:
-	import tkinter.ttk as ttk
-	py3 = True
+from tkinter import *
+import tkinter.ttk as ttk	
+import tkinter.font
+import tkinter.messagebox
 
 import interface_support
 import novel_data
@@ -39,6 +32,10 @@ top = None
 novel = ''
 data_novel = {}
 loop = False
+tab_img = {}
+
+def get_dir():
+	return os.path.dirname(os.path.realpath(__file__))
 
 def vp_start_gui():
 	'''Starting point when module is the main routine.'''
@@ -51,6 +48,7 @@ def vp_start_gui():
 	if time.time() - float(os.path.getmtime("novels.db")) >= 43200.0: #test 43200 = 12h
 		print('Updating Novel Database')
 		database_updator.start()
+		os.utime("novels.db")
 	
 	conn = sql.connect("novels.db")
 	cursor = conn.cursor()
@@ -75,15 +73,18 @@ def vp_start_gui():
 		index = 0
 		max = 0
 		for x in os.listdir('./ressources/fonts'):
-			print(x)
 			if os.path.isdir('./ressources/fonts/'+x): 
 				fonts.append(x)
 				if x == curFont:
 					index = max
 				max += 1
-		print(fonts)
 		top.TComboboxStyleFont["values"] = fonts
 		top.TComboboxStyleFont.current(index)
+		
+		top.LabelPreviewFont1.configure(font="-family {"+curFont+"} -size 9 -weight normal -slant roman -underline 0 -overstrike 0")
+		top.LabelPreviewFont2.configure(font="-family {"+curFont+"} -size 9 -weight normal -slant italic -underline 0 -overstrike 0")
+		top.LabelPreviewFont3.configure(font="-family {"+curFont+"} -size 9 -weight bold -slant roman -underline 0 -overstrike 0")
+		top.LabelPreviewFont4.configure(font="-family {"+curFont+"} -size 9 -weight bold -slant italic -underline 0 -overstrike 0")
 	except: 
 		traceback.print_exc()
 	
@@ -206,11 +207,22 @@ def book_change(index, value, op):
 	top.TComboboxEndingChapter.configure(state = "readonly")
 	
 def font_change(index, value, op):
-	global top
-	font = top.TComboboxStyleFont.get()
-	file1  = open("./ressources/loading_fonts.txt", "w")
-	file1.write(font) 
-	file1.close()
+	global top, root
+	curFont = top.TComboboxStyleFont.get()
+	root.after(100, font_change_pt2(curFont))
+	
+def font_change_pt2(curFont):
+	global top, root
+	if curFont not in tkinter.font.families():
+		tkinter.messagebox.showwarning('Error', 'Current font not installed in the system, preview text not availlable.\nThe files in the folder could be installed')
+	else:
+		file1  = open("./ressources/loading_fonts.txt", "w")
+		file1.write(curFont) 
+		file1.close()
+		top.LabelPreviewFont1.configure(font="-family {"+curFont+"} -size 9 -weight normal -slant roman -underline 0 -overstrike 0")
+		top.LabelPreviewFont2.configure(font="-family {"+curFont+"} -size 9 -weight normal -slant italic -underline 0 -overstrike 0")
+		top.LabelPreviewFont3.configure(font="-family {"+curFont+"} -size 9 -weight bold -slant roman -underline 0 -overstrike 0")
+		top.LabelPreviewFont4.configure(font="-family {"+curFont+"} -size 9 -weight bold -slant italic -underline 0 -overstrike 0")
 	
 def quit():
 	global loop
@@ -576,8 +588,45 @@ class New_Toplevel:
 		self.TComboboxStyleFont.configure(state="readonly")
 		
 		
+		self.LabelPreviewFont1 = Label(top)
+		self.LabelPreviewFont1.place(relx=0.02, rely=0.69, height=21, width=130)
+		self.LabelPreviewFont1.configure(background="#a8a8a8")
+		self.LabelPreviewFont1.configure(foreground="#000000")
+		self.LabelPreviewFont1.configure(font="TkDefaultFont")
+		self.LabelPreviewFont1.configure(relief=FLAT)
+		self.LabelPreviewFont1.configure(justify=CENTER)
+		self.LabelPreviewFont1.configure(text='''Preview Regular''')
+		
+		self.LabelPreviewFont2 = Label(top)
+		self.LabelPreviewFont2.place(relx=0.265, rely=0.69, height=21, width=130)
+		self.LabelPreviewFont2.configure(background="#a8a8a8")
+		self.LabelPreviewFont2.configure(foreground="#000000")
+		self.LabelPreviewFont2.configure(font="TkDefaultFont")
+		self.LabelPreviewFont2.configure(relief=FLAT)
+		self.LabelPreviewFont2.configure(justify=CENTER)
+		self.LabelPreviewFont2.configure(text='''Preview Italic''')
+		
+		self.LabelPreviewFont3 = Label(top)
+		self.LabelPreviewFont3.place(relx=0.515, rely=0.69, height=21, width=130)
+		self.LabelPreviewFont3.configure(background="#a8a8a8")
+		self.LabelPreviewFont3.configure(foreground="#000000")
+		self.LabelPreviewFont3.configure(font="TkDefaultFont")
+		self.LabelPreviewFont3.configure(relief=FLAT)
+		self.LabelPreviewFont3.configure(justify=CENTER)
+		self.LabelPreviewFont3.configure(text='''Preview Bold''')
+		
+		self.LabelPreviewFont4 = Label(top)
+		self.LabelPreviewFont4.place(relx=0.76, rely=0.69, height=21, width=130)
+		self.LabelPreviewFont4.configure(background="#a8a8a8")
+		self.LabelPreviewFont4.configure(foreground="#000000")
+		self.LabelPreviewFont4.configure(font="TkDefaultFont")
+		self.LabelPreviewFont4.configure(relief=FLAT)
+		self.LabelPreviewFont4.configure(justify=CENTER)
+		self.LabelPreviewFont4.configure(text='''Preview Bold-Italic''')
+		
+		
 		self.ButtonExit = Button(top)
-		self.ButtonExit.place(relx=0.02, rely=0.695, height=24, width=174)
+		self.ButtonExit.place(relx=0.02, rely=0.80, height=24, width=174)
 		self.ButtonExit.configure(activebackground="#d80000")
 		self.ButtonExit.configure(activeforeground="white")
 		self.ButtonExit.configure(activeforeground="#000000")
@@ -592,7 +641,7 @@ class New_Toplevel:
 		self.ButtonExit.configure(command = quit)
 
 		self.TButtonGenerate = ttk.Button(top)
-		self.TButtonGenerate.place(relx=0.32, rely=0.695, height=25, width=392)
+		self.TButtonGenerate.place(relx=0.32, rely=0.80, height=25, width=392)
 		self.TButtonGenerate.configure(takefocus="")
 		self.TButtonGenerate.configure(text='''Generate''')
 		self.TButtonGenerate.configure(width=396)
