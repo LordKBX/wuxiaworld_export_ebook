@@ -52,7 +52,7 @@ def vp_start_gui():
 	
 	conn = sql.connect("novels.db")
 	cursor = conn.cursor()
-	cursor.execute("SELECT NovelName,link,autor,cover FROM 'Information'")
+	cursor.execute("SELECT NovelName,link,autor,cover FROM 'Information' ORDER BY NovelName ASC")
 	db = cursor.fetchall()
 	namelist = []
 	for i in db:
@@ -80,11 +80,13 @@ def vp_start_gui():
 				max += 1
 		top.TComboboxStyleFont["values"] = fonts
 		top.TComboboxStyleFont.current(index)
-		
-		top.LabelPreviewFont1.configure(font="-family {"+curFont+"} -size 9 -weight normal -slant roman -underline 0 -overstrike 0")
-		top.LabelPreviewFont2.configure(font="-family {"+curFont+"} -size 9 -weight normal -slant italic -underline 0 -overstrike 0")
-		top.LabelPreviewFont3.configure(font="-family {"+curFont+"} -size 9 -weight bold -slant roman -underline 0 -overstrike 0")
-		top.LabelPreviewFont4.configure(font="-family {"+curFont+"} -size 9 -weight bold -slant italic -underline 0 -overstrike 0")
+		try:
+			top.LabelPreviewFont1.configure(font="-family {"+curFont+"} -size 9 -weight normal -slant roman -underline 0 -overstrike 0")
+			top.LabelPreviewFont2.configure(font="-family {"+curFont+"} -size 9 -weight normal -slant italic -underline 0 -overstrike 0")
+			top.LabelPreviewFont3.configure(font="-family {"+curFont+"} -size 9 -weight bold -slant roman -underline 0 -overstrike 0")
+			top.LabelPreviewFont4.configure(font="-family {"+curFont+"} -size 9 -weight bold -slant italic -underline 0 -overstrike 0")
+		except: 
+			{}
 	except: 
 		traceback.print_exc()
 	
@@ -124,7 +126,7 @@ def novel_change(index, value, op):
 	
 	def callback():
 		global top, novel, cursor, data_novel, root
-		data_novel['books'], data_novel['alt_books'] = novel_data.import_data(i[0])
+		data_novel['books'], data_novel['alt_books'] = novel_data.import_data(data_novel['link'], novel)
 		top.TComboboxExportMode.configure(state = "readonly")
 		top.TComboboxFullExport.configure(state = "readonly")
 		top.LabelStatusBar1.configure(background="#4fa839")
@@ -288,6 +290,10 @@ def generate():
 			msg2 = chapter_start
 			msg3 = '=>'
 			msg4 = chapter_end
+			
+			cover = data_novel['cover']
+			if cover[0] == '/':
+				cover = 'https://cdn.wuxiaworld.com' + cover
 			
 			getify.cover_generator(data_novel['cover'], msg1, msg2, msg3, msg4)
 			

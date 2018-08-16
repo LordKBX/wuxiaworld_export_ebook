@@ -6,7 +6,7 @@ import sys
 import copy
 from bs4 import BeautifulSoup
 
-def import_data(link):
+def import_data(link, novel):
 	#link = 'https://www.wuxiaworld.com/novel/child-of-light'
 	print(link)
 	file_name = 'import.html'
@@ -32,14 +32,15 @@ def import_data(link):
 	tab = soup.find_all('ul')
 	sttr = '{}'.format(tab)
 	find1 = sttr.find('Chapter 1 ')
-	if sttr.find('Chapter 1 ', find1+1) != -1: with_volume = True
+	exclude_list = ['Heavenly Jewel Change', 'God of Crime']
+	if sttr.find('Chapter 1 ', find1+1) != -1 and novel not in exclude_list: with_volume = True
 	else: books['Book 0'] = []
 
 	for block in tab:
 		tbl = '{}'.format(block)
 		if tbl.find('list-chapters') != -1:
 			tab2 = block.find_all('li')
-			last = '*'
+			last = '0'
 			for li in tab2:
 				if with_volume is False:
 					books['Book 0'].append({'name': li.find('span').string, 'url': li.find('a').get('href')})

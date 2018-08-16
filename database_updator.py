@@ -35,7 +35,7 @@ def download(link, file_name):
 def insert_novel(name, url):
 	global conn, cursor
 	filename = "./tmp/novel_"+urllib.parse.quote(name)+".html"
-	down = "https://www.novelupdates.com/series/"+name.replace("'", '').replace(" ", '-')+"/"
+	down = "https://www.novelupdates.com/series/"+name.replace("&", 'and').replace("'", '').replace(" ", '-')+"/"
 	try:
 		download(down, filename)
 	except HTTPError as e:
@@ -92,13 +92,7 @@ def start():
 	global conn, cursor
 	conn = sql.connect("novels.db")
 	cursor = conn.cursor()
-	# cursor.execute("SELECT NovelName,link,autor,cover FROM 'Information'")
-	# db = cursor.fetchall()
-	# namelist = []
-	# for i in db:
-		# namelist.append(i[0])
-		# namelist.sort()
-	# print(namelist)
+	
 	if os.path.isdir('./tmp') is False:
 		os.mkdir('./tmp')
 	
@@ -113,6 +107,8 @@ def start():
 		# Not an HTTP-specific error (e.g. connection refused)
 		print('URL: {}, URLError: {}'.format(baseurl, e.reason))
 	else:
+		cursor.execute("DELETE FROM 'Information'")
+		conn.commit()
 		fileHandle = open(filename, "r", encoding = "utf8")
 		soup = BeautifulSoup(fileHandle, 'html.parser')
 		tables = soup.find_all(class_="table table-novels")
