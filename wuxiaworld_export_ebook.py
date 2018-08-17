@@ -45,6 +45,28 @@ def vp_start_gui():
 	top = New_Toplevel (root)
 	interface_support.init(root, top)
 	
+	print('Check script update')
+	file_version_online = './check_version.txt'
+	try:
+		getify.download('https://raw.githubusercontent.com/LordKBX/wuxiaworld_export_ebook/master/version.txt', file_version_online)
+	except HTTPError as e:
+		# Return code error (e.g. 404, 501, ...)
+		print('URL: {}, HTTPError: {} - {}'.format(bulk_list[x]['url'], e.code, e.reason))
+	except URLError as e:
+		# Not an HTTP-specific error (e.g. connection refused)
+		print('URL: {}, URLError: {}'.format(bulk_list[x]['url'], e.reason))
+	else:
+		file1  = open("./version.txt", "r")
+		file2  = open(file_version_online, "r")
+		version_locale = file1.read()
+		version_online = file2.read()
+		file1.close()
+		file2.close()
+		if version_locale not in version_online:
+			tkinter.messagebox.showinfo('Update', "A new version of the script is online\nhttps://github.com/LordKBX/wuxiaworld_export_ebook")
+		else: print('Script up to date')
+			
+	
 	if time.time() - float(os.path.getmtime("novels.db")) >= 43200.0: #test 43200 = 12h
 		print('Updating Novel Database')
 		database_updator.start()
