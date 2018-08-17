@@ -19,6 +19,17 @@ import re
 
 conn = None
 cursor = None
+exclusion_novel_list = [
+	# 'Condemning the Heavens',
+	# 'Blue Phoenix'
+]
+limited_novel_list = [
+	'Condemning the Heavens',
+	'Blue Phoenix',
+	'The Divine Elements',
+	'Legends of Ogre Gate',
+	'Overthrowing Fate'
+]
 alt_cover_list = {
 	'7 Killers': 'https://image.ibb.co/fAgv6U/7k.png',
 	'Warlock of the Magus World': 'https://image.ibb.co/gEOTt9/600.jpg',
@@ -48,7 +59,9 @@ def download(link, file_name):
 		 shutil.copyfileobj(response, out_file)
 		 
 def insert_novel(name, url):
-	global conn, cursor, alt_cover_list, exception_names_list
+	global conn, cursor, alt_cover_list, exception_names_list, limited_novel_list
+	limit = 0
+	if name in limited_novel_list: limit = 1
 	filename = "./tmp/novel_"+urllib.parse.quote(name)+".html"
 	if name in exception_names_list: down = "https://www.novelupdates.com/series/"+exception_names_list[name]+"/"
 	else: down = "https://www.novelupdates.com/series/"+name.lower().replace("&", 'and').replace("'", '').replace(" ", '-')+"/"
@@ -74,13 +87,16 @@ def insert_novel(name, url):
 		for aut in dom_authors:
 			if autors != '': autors += ', '
 			autors += aut.string
-		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover) VALUES(?,?,?,?)", (name, url, autors, img))
+		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited) VALUES(?,?,?,?,?)", (name, url, autors, img, limit))
 		conn.commit()
 		fileHandle.close();
 		os.remove(filename)
 		 
 def insert_novel2(name, url):
-	global conn, cursor, alt_cover_list
+	global conn, cursor, alt_cover_list, limited_novel_list
+	limit = 0
+	if name in limited_novel_list: limit = 1
+	
 	filename = "./tmp/novel_"+urllib.parse.quote(name)+"_2.html"
 	down = url
 	try:
@@ -110,7 +126,7 @@ def insert_novel2(name, url):
 					if clean not in autors:
 						if autors != '': autors += ', '
 						autors += clean
-		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover) VALUES(?,?,?,?)", (name, url, autors, img))
+		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited) VALUES(?,?,?,?,?)", (name, url, autors, img, limit))
 		conn.commit()
 		fileHandle.close();
 		os.remove(filename)
@@ -147,7 +163,7 @@ def start():
 				cursor.execute("SELECT NovelName,link,autor,cover FROM 'Information' WHERE NovelName LIKE ?", (name,))
 				row = cursor.fetchone()
 				if row is None:
-					print('NEW', name)
+					print('=> Processing:', name)
 					insert_novel(name, 'https://www.wuxiaworld.com'+url)
 		fileHandle.close()
 		os.remove(filename)
@@ -169,12 +185,13 @@ def start():
 			novels_dom = tab.find_all(class_="media")
 			for title in novels_dom:
 				name = title.find('h4').string.replace('’', "'").strip()
-				url = title.find('a').get('href')
-				cursor.execute("SELECT NovelName,link,autor,cover FROM 'Information' WHERE NovelName LIKE ?", (name,))
-				row = cursor.fetchone()
-				if row is None:
-					print('=> Processing:', name)
-					insert_novel(name, 'https://www.wuxiaworld.com'+url)
+				if name not in exclusion_novel_list:
+					url = title.find('a').get('href')
+					cursor.execute("SELECT NovelName,link,autor,cover FROM 'Information' WHERE NovelName LIKE ?", (name,))
+					row = cursor.fetchone()
+					if row is None:
+						print('=> Processing:', name)
+						insert_novel(name, 'https://www.wuxiaworld.com'+url)
 			fileHandle.close()
 			os.remove(filename)
 			

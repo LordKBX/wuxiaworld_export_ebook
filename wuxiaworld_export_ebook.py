@@ -75,7 +75,7 @@ def vp_start_gui():
 	
 	conn = sql.connect("novels.db")
 	cursor = conn.cursor()
-	cursor.execute("SELECT NovelName,link,autor,cover FROM 'Information' ORDER BY NovelName ASC")
+	cursor.execute("SELECT NovelName FROM 'Information' ORDER BY NovelName ASC")
 	db = cursor.fetchall()
 	namelist = []
 	for i in db:
@@ -149,7 +149,10 @@ def novel_change(index, value, op):
 	
 	def callback():
 		global top, novel, cursor, data_novel, root
-		data_novel['books'], data_novel['alt_books'] = novel_data.import_data(data_novel['link'], novel)
+		if data_novel['limited'] == 1:
+			tkinter.messagebox.showinfo('Information', "You have select a WuxiaWorld original novel.\n" +
+			"Because they sell ebooks of their originals novel, you would be limited to the first 45 chapters in classic mode or the first book in alternate mode")
+		data_novel['books'], data_novel['alt_books'] = novel_data.import_data(data_novel['link'], novel, data_novel['limited'])
 		top.TComboboxExportMode.configure(state = "readonly")
 		top.TComboboxFullExport.configure(state = "readonly")
 		top.LabelStatusBar1.configure(background="#4fa839")
@@ -166,13 +169,14 @@ def novel_change(index, value, op):
 		novel = re
 		print(re)
 		init_inputs()
-		cursor.execute("SELECT link,autor,cover FROM 'Information' WHERE NovelName LIKE ?", (re,))
+		cursor.execute("SELECT link,autor,cover,limited FROM 'Information' WHERE NovelName LIKE ?", (re,))
 		db = cursor.fetchall()
 		data_novel={}
 		for i in db:
 			data_novel['link'] = i[0]
 			data_novel['autor'] = i[1]
 			data_novel['cover'] = i[2]
+			data_novel['limited'] = i[3]
 		root.after(100, callback)
 		
 def export_mode_change(index, value, op):

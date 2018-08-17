@@ -43,6 +43,10 @@ class WebView(QtWebKit.QWebView):
 		
 
 class Ui_Dialog(object):
+	def __init__(self):
+		self.urlBase = os.path.dirname(os.path.dirname(os.path.realpath(__file__))).replace('\\', '/')
+		print('base', self.urlBase)
+		
 	def setupUi(self, Dialog):
 		self.dialog = Dialog
 		Dialog.setObjectName(_fromUtf8("Dialog"))
@@ -177,8 +181,8 @@ class Ui_Dialog(object):
 		self.pushButtonSave.setStyleSheet(_fromUtf8("background-color: rgb(220, 220, 220);"))
 
 	def main(self):
-		file1  = open("./ressources/loading_fonts.txt", "r")
-		file2  = open("./ressources/common.css", "r")
+		file1  = open(self.urlBase+"/ressources/loading_fonts.txt", "r")
+		file2  = open(self.urlBase+"/ressources/common.css", "r")
 		self.current_style_font = file1.read()
 		css = file2.read()
 		file1.close()
@@ -191,7 +195,7 @@ class Ui_Dialog(object):
 		self.highlightTimer.timeout.connect(self.redoTextHighlight)
 		self.highlightTimer.start(200)
 		
-		self.checkFontLastTime = float(os.path.getmtime("./ressources/loading_fonts.txt"))
+		self.checkFontLastTime = float(os.path.getmtime(self.urlBase+"/ressources/loading_fonts.txt"))
 		self.checkFontTimer = PyQt4.QtCore.QTimer()
 		self.checkFontTimer.timeout.connect(self.updateFont)
 		self.checkFontTimer.start(200)
@@ -200,10 +204,10 @@ class Ui_Dialog(object):
 		self.dialog.show()
 	
 	def updateFont(self):
-		newTime = float(os.path.getmtime("./ressources/loading_fonts.txt"))
+		newTime = float(os.path.getmtime(self.urlBase+"/ressources/loading_fonts.txt"))
 		if self.checkFontLastTime < newTime:
 			self.checkFontLastTime = newTime
-			file1  = open("./ressources/loading_fonts.txt", "r")
+			file1  = open(self.urlBase+"/ressources/loading_fonts.txt", "r")
 			self.current_style_font = file1.read()
 			file1.close()
 			self.clickPreview()
@@ -221,19 +225,19 @@ class Ui_Dialog(object):
 		if check_is_toc is not current_is_toc:
 			print('changePage')
 			if check_is_toc is True:
-				self.webView.setUrl(PyQt4.QtCore.QUrl(_fromUtf8("tmp/toc.xhtml")))
-				file2  = open("./tmp/toc.xhtml", "rb")
+				self.webView.setUrl(PyQt4.QtCore.QUrl(_fromUtf8(self.urlBase+"/tmp/toc.xhtml")))
+				file2  = open(self.urlBase+"/tmp/toc.xhtml", "rb")
 				
 			else:
-				self.webView.setUrl(PyQt4.QtCore.QUrl(_fromUtf8("tmp/ch-1.xhtml")))
-				file2  = open("./tmp/ch-1.xhtml", "rb")
+				self.webView.setUrl(PyQt4.QtCore.QUrl(_fromUtf8(self.urlBase+"/tmp/ch-1.xhtml")))
+				file2  = open(self.urlBase+"/tmp/ch-1.xhtml", "rb")
 			soup = BeautifulSoup(file2, 'html.parser')
 			self.plainTextEdit.setPlainText(soup.prettify())
 			file2.close()
 				
 	def clickPreview(self):
 		text = self.textEdit.document().toPlainText()
-		file3  = open("./tmp/common.css", "w")
+		file3  = open(self.urlBase+"/tmp/common.css", "w")
 		file3.write(text.replace('<FONT>', self.current_style_font))
 		file3.close()
 		self.webView.reload()
@@ -242,7 +246,7 @@ class Ui_Dialog(object):
 		text = self.textEdit.document().toPlainText()
 		#print(text)
 		print('Sauvegarde css')
-		file3  = open("./ressources/common.css", "w")
+		file3  = open(self.urlBase+"/ressources/common.css", "w")
 		file3.write(text)
 		file3.close()
 		self.webView.reload()
