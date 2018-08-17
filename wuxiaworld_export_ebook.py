@@ -298,7 +298,7 @@ def preview():
 		# Not an HTTP-specific error (e.g. connection refused)
 		print('URL: {}, URLError: {}'.format(bulk_list[x]['url'], e.reason))
 	else:
-		getify.clean(filename, filenameOut, novel)
+		getify.clean(filename, "./tmp/"+filenameOut, novel)
 		filenameOut += ".xhtml"
 		text_toc = getify.generate_toc([filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut], novel)
 		file3  = open("./tmp/toc.xhtml", "w")

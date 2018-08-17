@@ -231,6 +231,7 @@ def generate_toc(html_files, novel):
 		<!DOCTYPE html>
 		<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
 		<head>
+			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 			<title>%(novelname)s</title>
 			<link href="common.css" rel="stylesheet" type="text/css"/>
 		</head>
@@ -255,6 +256,6 @@ def generate_toc(html_files, novel):
 		chapter = str(chapter).replace('title>', 'span>')
 		toc_mid += '''<li class="toc-Chapter-rw" id="num_%s">
 			<a href="%s">%s</a>
-			</li>''' % (i, html_files[i], chapter)
+			</li>''' % (i, os.path.basename(html_files[i]), chapter)
 			
 	return toc_start % {"novelname": novel, "toc_mid": toc_mid, "toc_end": toc_end}
