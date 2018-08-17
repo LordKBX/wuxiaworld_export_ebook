@@ -197,7 +197,7 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 
 	
 
-	epub.writestr("OEBPS/toc.xhtml", generate_toc(html_files, novel))
+	epub.writestr("OEBPS/toc.xhtml", generate_toc(html_files, novelname))
 	
 	epub.write("./tmp/cover.png", "OEBPS/cover.png")
 	os.remove("./tmp/cover.png")
