@@ -151,7 +151,7 @@ def novel_change(index, value, op):
 		global top, novel, cursor, data_novel, root
 		if data_novel['limited'] == 1:
 			tkinter.messagebox.showinfo('Information', "You have select a WuxiaWorld original novel.\n" +
-			"Because they sell ebooks of their originals novel, you would be limited to the first 45 chapters in classic mode or the first book in alternate mode")
+			"Because they sell ebooks of their originals novel(on Amazon), you would be limited to the first 45 chapters in classic mode or the first book in alternate mode")
 		data_novel['books'], data_novel['alt_books'] = novel_data.import_data(data_novel['link'], novel, data_novel['limited'])
 		top.TComboboxExportMode.configure(state = "readonly")
 		top.TComboboxFullExport.configure(state = "readonly")
