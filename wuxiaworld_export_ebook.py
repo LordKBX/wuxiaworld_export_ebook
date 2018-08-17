@@ -22,6 +22,7 @@ import database_updator
 import getify
 from urllib.error import HTTPError, URLError
 import time
+import subprocess
 
 
 conn = None
@@ -45,7 +46,7 @@ def vp_start_gui():
 	top = New_Toplevel (root)
 	interface_support.init(root, top)
 	
-	print('Check script update')
+	print('> Check script update')
 	file_version_online = './check_version.txt'
 	try:
 		getify.download('https://raw.githubusercontent.com/LordKBX/wuxiaworld_export_ebook/master/version.txt', file_version_online)
@@ -64,11 +65,11 @@ def vp_start_gui():
 		file2.close()
 		if version_locale not in version_online:
 			tkinter.messagebox.showinfo('Update', "A new version of the script is online\nhttps://github.com/LordKBX/wuxiaworld_export_ebook")
-		else: print('Script up to date')
+		else: print('< Script up to date')
 			
 	
 	if time.time() - float(os.path.getmtime("novels.db")) >= 43200.0: #test 43200 = 12h
-		print('Updating Novel Database')
+		print('> Updating Novel Database')
 		database_updator.start()
 		os.utime("novels.db")
 	
@@ -261,9 +262,45 @@ def quit():
 	if loop is True: return
 	exit()
 	
+def preview():
+	global top, novel, cursor, data_novel, root, loop
+	if novel == '':
+		tkinter.messagebox.showinfo('Information', "Function availlable only if a novel was selected")
+		return
+	file2  = open("./ressources/common.css", "r")
+	css = file2.read()
+	file2.close()
+	file3  = open("./tmp/common.css", "w")
+	file3.write(css.replace('<FONT>', top.TComboboxStyleFont.get()))
+	file3.close()
+	
+	link = ''
+	book = 'Book 0'
+	if book not in data_novel['books']: book = 'Book 01'
+	link = data_novel['books'][book][0]['url']
+	ti = link.split('/')
+	filename = "./tmp/"+ti[len(ti) - 1] + ".xhtml"
+	filenameOut = "./tmp/"+'ch-{}'.format(1)
+	
+	try:
+		getify.download('https://www.wuxiaworld.com' + link, filename)
+	except HTTPError as e:
+		# Return code error (e.g. 404, 501, ...)
+		print('URL: {}, HTTPError: {} - {}'.format(bulk_list[x]['url'], e.code, e.reason))
+	except URLError as e:
+		# Not an HTTP-specific error (e.g. connection refused)
+		print('URL: {}, URLError: {}'.format(bulk_list[x]['url'], e.reason))
+	else:
+		getify.clean(filename, filenameOut, novel)
+		filenameOut += ".xhtml"
+		text_toc = getify.generate_toc([filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut], novel)
+		file3  = open("./tmp/toc.xhtml", "w")
+		file3.write(text_toc)
+		file3.close()
+		command1 = subprocess.Popen([sys.executable, "./css_editor/launch.py"])
+	
 def generate():
 	global top, novel, cursor, data_novel, root, loop
-	print('novel: {}'.format(novel))
 	if novel == '': return
 	
 	loop = True
@@ -677,7 +714,14 @@ class New_Toplevel:
 		self.ButtonExit.configure(command = quit)
 
 		self.TButtonGenerate = ttk.Button(top)
-		self.TButtonGenerate.place(relx=0.32, rely=0.80, height=25, width=392)
+		self.TButtonGenerate.place(relx=0.32, rely=0.80, height=25, width=100)
+		self.TButtonGenerate.configure(takefocus="")
+		self.TButtonGenerate.configure(text='''Style Preview''')
+		self.TButtonGenerate.configure(width=396)
+		self.TButtonGenerate.configure(command = preview)
+
+		self.TButtonGenerate = ttk.Button(top)
+		self.TButtonGenerate.place(relx=0.49, rely=0.80, height=25, width=292)
 		self.TButtonGenerate.configure(takefocus="")
 		self.TButtonGenerate.configure(text='''Generate''')
 		self.TButtonGenerate.configure(width=396)

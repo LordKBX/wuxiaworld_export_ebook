@@ -20,14 +20,20 @@ import re
 conn = None
 cursor = None
 alt_cover_list = {
-			'7 Killers': 'https://image.ibb.co/fAgv6U/7k.png',
-			'Warlock of the Magus World': 'https://image.ibb.co/gEOTt9/600.jpg',
-			'Overthrowing Fate': 'https://image.ibb.co/m6SWyK/otf.png',
-			'Legends of Ogre Gate': 'https://image.ibb.co/myNLse/loog_1.png',
-			'Blue Phoenix': 'https://image.ibb.co/i4q6Xe/bp_1.png',
-			'The Divine Elements': 'https://image.ibb.co/ceG58K/tde_1.png',
-			'Condemning the Heavens': 'https://image.ibb.co/mTK8TK/cth_1.png'
-			}
+	'7 Killers': 'https://image.ibb.co/fAgv6U/7k.png',
+	'Warlock of the Magus World': 'https://image.ibb.co/gEOTt9/600.jpg',
+	'Overthrowing Fate': 'https://image.ibb.co/m6SWyK/otf.png',
+	'Legends of Ogre Gate': 'https://image.ibb.co/myNLse/loog_1.png',
+	'Blue Phoenix': 'https://image.ibb.co/i4q6Xe/bp_1.png',
+	'The Divine Elements': 'https://image.ibb.co/ceG58K/tde_1.png',
+	'Condemning the Heavens': 'https://image.ibb.co/mTK8TK/cth_1.png'
+	}
+exception_names_list = {#for finding them on novelupdates.com
+		'Legend of the Dragon King': 'the-legend-of-the-dragon-king',
+		'The Unrivaled Tang Sect': 'douluo-dalu-2-the-unrivaled-tang-sect',
+		'Desolate Era': 'the-desolate-era',
+		'Stellar Transformations': 'stellar-transformation'
+	}
 
 def download(link, file_name):
 	url = urllib.request.Request(
@@ -42,16 +48,9 @@ def download(link, file_name):
 		 shutil.copyfileobj(response, out_file)
 		 
 def insert_novel(name, url):
-	global conn, cursor, alt_cover_list
+	global conn, cursor, alt_cover_list, exception_names_list
 	filename = "./tmp/novel_"+urllib.parse.quote(name)+".html"
-	exception_names_list = {
-		'Legend of the Dragon King': 'the-legend-of-the-dragon-king',
-		'The Unrivaled Tang Sect': 'douluo-dalu-2-the-unrivaled-tang-sect',
-		'Desolate Era': 'the-desolate-era',
-		'Stellar Transformations': 'stellar-transformation'
-	}
-	if name in exception_names_list:
-		down = "https://www.novelupdates.com/series/"+exception_names_list[name]+"/"
+	if name in exception_names_list: down = "https://www.novelupdates.com/series/"+exception_names_list[name]+"/"
 	else: down = "https://www.novelupdates.com/series/"+name.lower().replace("&", 'and').replace("'", '').replace(" ", '-')+"/"
 	try:
 		download(down, filename)
@@ -174,13 +173,13 @@ def start():
 				cursor.execute("SELECT NovelName,link,autor,cover FROM 'Information' WHERE NovelName LIKE ?", (name,))
 				row = cursor.fetchone()
 				if row is None:
-					print('NEW', name)
+					print('=> Processing:', name)
 					insert_novel(name, 'https://www.wuxiaworld.com'+url)
 			fileHandle.close()
 			os.remove(filename)
 			
 		
-		print('Database Update Completed')
+		print('< Database Update Completed')
 
 if __name__ == '__main__':
 	start()

@@ -195,7 +195,37 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 		"spine": spine,
 		})
 
- #Generates a Table of Contents + lost strings
+	
+
+	epub.writestr("OEBPS/toc.xhtml", generate_toc(html_files, novel))
+	
+	epub.write("./tmp/cover.png", "OEBPS/cover.png")
+	os.remove("./tmp/cover.png")
+	
+	
+	file2  = open("./ressources/common.css", "r")
+	file3  = open("./tmp/common.css", "w")
+	ccss = file2.read()
+	file2.close()
+	ccss = ccss.replace('<FONT>', font)
+	file3.write(ccss) 
+	file3.close()
+	
+	epub.write("./tmp/common.css", "OEBPS/common.css")
+	os.remove("./tmp/common.css")
+	epub.write("./ressources/fonts/"+font+"/Regular.ttf", "OEBPS/Regular.ttf")
+	epub.write("./ressources/fonts/"+font+"/Bold.ttf", "OEBPS/Bold.ttf")
+	epub.write("./ressources/fonts/"+font+"/Bold-Italic.ttf", "OEBPS/Bold-Italic.ttf")
+	epub.write("./ressources/fonts/"+font+"/Italic.ttf", "OEBPS/Italic.ttf")
+	
+	epub.close()
+
+	#removes all the temporary files
+	for x in html_files:
+		os.remove(x)
+
+def generate_toc(html_files, novel):
+	#Generates a Table of Contents + lost strings
 	toc_start = '''<?xml version='1.0' encoding='utf-8'?>
 		<!DOCTYPE html>
 		<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
@@ -222,30 +252,5 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 		toc_mid += '''<li class="toc-Chapter-rw" id="num_%s">
 			<a href="%s">%s</a>
 			</li>''' % (i, html_files[i], chapter)
-
-	epub.writestr("OEBPS/toc.xhtml", toc_start % {"novelname": fileName, "toc_mid": toc_mid, "toc_end": toc_end})
-	
-	epub.write("./tmp/cover.png", "OEBPS/cover.png")
-	os.remove("./tmp/cover.png")
-	
-	
-	file2  = open("./ressources/common.css", "r")
-	file3  = open("./tmp/common.css", "w")
-	ccss = file2.read()
-	file2.close()
-	ccss = ccss.replace('<FONT>', font)
-	file3.write(ccss) 
-	file3.close()
-	
-	epub.write("./tmp/common.css", "OEBPS/common.css")
-	os.remove("./tmp/common.css")
-	epub.write("./ressources/fonts/"+font+"/Regular.ttf", "OEBPS/Regular.ttf")
-	epub.write("./ressources/fonts/"+font+"/Bold.ttf", "OEBPS/Bold.ttf")
-	epub.write("./ressources/fonts/"+font+"/Bold-Italic.ttf", "OEBPS/Bold-Italic.ttf")
-	epub.write("./ressources/fonts/"+font+"/Italic.ttf", "OEBPS/Italic.ttf")
-	
-	epub.close()
-
-	#removes all the temporary files
-	for x in html_files:
-		os.remove(x)
+			
+	return toc_start % {"novelname": novel, "toc_mid": toc_mid, "toc_end": toc_end}
