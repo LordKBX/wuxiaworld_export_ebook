@@ -713,12 +713,12 @@ class New_Toplevel:
 		self.ButtonExit.configure(width=170)
 		self.ButtonExit.configure(command = quit)
 
-		self.TButtonGenerate = ttk.Button(top)
-		self.TButtonGenerate.place(relx=0.32, rely=0.80, height=25, width=100)
-		self.TButtonGenerate.configure(takefocus="")
-		self.TButtonGenerate.configure(text='''Style Preview''')
-		self.TButtonGenerate.configure(width=396)
-		self.TButtonGenerate.configure(command = preview)
+		self.TButtonPreview = ttk.Button(top)
+		self.TButtonPreview.place(relx=0.32, rely=0.80, height=25, width=100)
+		self.TButtonPreview.configure(takefocus="")
+		self.TButtonPreview.configure(text='''Style Preview''')
+		self.TButtonPreview.configure(width=396)
+		self.TButtonPreview.configure(command = preview)
 
 		self.TButtonGenerate = ttk.Button(top)
 		self.TButtonGenerate.place(relx=0.49, rely=0.80, height=25, width=292)
