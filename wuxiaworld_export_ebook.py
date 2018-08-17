@@ -271,6 +271,9 @@ def preview():
 	if novel == '':
 		tkinter.messagebox.showinfo('Information', "Function availlable only if a novel was selected")
 		return
+		
+	getify.cover_generator(data_novel['cover'], novel, top.TComboboxBook.get(), data_novel['autor'])
+		
 	file2  = open("./ressources/common.css", "r")
 	css = file2.read()
 	file2.close()

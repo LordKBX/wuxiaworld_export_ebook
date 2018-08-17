@@ -47,6 +47,7 @@ def clean(file_name_in, file_name_out, start):
 	file = open(file_name_out + ".xhtml", "w", encoding = "utf8")
 	file.write('<html xmlns="http://www.w3.org/1999/xhtml">')
 	file.write("\n<head>")
+	file.write('\n<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>')
 	file.write("\n<title>" + chapter_title + "</title>")
 	file.write("\n"+'<link href="common.css" rel="stylesheet" type="text/css"/>')
 	file.write("\n</head>")
@@ -234,6 +235,9 @@ def generate_toc(html_files, novel):
 			<link href="common.css" rel="stylesheet" type="text/css"/>
 		</head>
 		<body>
+			<section class="frontmatter sectionCover">
+				<img src="cover.png" alt="cover"/>
+			</section>
 			<section class="frontmatter TableOfContents">
 				<header>
 					<h1>Contents</h1>
