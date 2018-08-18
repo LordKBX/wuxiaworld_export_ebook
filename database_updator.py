@@ -19,6 +19,7 @@ import re
 
 conn = None
 cursor = None
+
 exclusion_novel_list = [
 	# 'Condemning the Heavens',
 	# 'Blue Phoenix'
@@ -195,7 +196,8 @@ def start():
 			fileHandle.close()
 			os.remove(filename)
 			
-		
+		cursor = None
+		conn.close()
 		print('< Database Update Completed')
 
 if __name__ == '__main__':

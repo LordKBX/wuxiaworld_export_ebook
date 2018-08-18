@@ -178,6 +178,7 @@ class _WebkitRendererHelper(QObject):
 		self._view = QWebView()
 		self._view.setPage(self._page)
 		self._window = QMainWindow()
+		self._window.setWindowTitle('Cover Generator')
 		self._window.setCentralWidget(self._view)
 
 		# Import QWebSettings

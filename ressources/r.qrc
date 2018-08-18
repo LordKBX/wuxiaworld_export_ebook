@@ -1,0 +1,10 @@
+<RCC>
+  <qresource prefix="root">
+    <file>icon16x16.png</file>
+    <file>icon24x24.png</file>
+    <file>icon32x32.png</file>
+    <file>icon48x48.png</file>
+    <file>icon256x256.png</file>
+    <file>info72x72.png</file>
+  </qresource>
+</RCC>

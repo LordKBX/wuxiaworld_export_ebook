@@ -119,6 +119,17 @@ def cover_generator(src, novel, book_name, author):
 	Sidenote: Will take a lot of time."""
 
 
+def generate_name(novelname, author, chaptername, book, chapter_s, chapter_e):
+	fileName = ''
+	if book is None:
+		fileName = novelname + " - {}-{}".format(chapter_s, chapter_e)
+	else:
+		if chapter_s is None:
+			fileName = novelname + " - {}".format(book)
+		else:
+			fileName = novelname + " - {} - {}-{}".format(book, chapter_s, chapter_e)
+	return author + ' - ' + fileName
+	
 def generate(html_files, novelname, author, chaptername, book, chapter_s, chapter_e):
 	if os.path.isdir('./export') is False:
 		os.mkdir('./export')
@@ -201,7 +212,8 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	epub.writestr("OEBPS/toc.xhtml", generate_toc(html_files, novelname))
 	
 	epub.write("./tmp/cover.png", "OEBPS/cover.png")
-	os.remove("./tmp/cover.png")
+	try: os.remove("./tmp/cover.png")
+	except: {}
 	
 	
 	file2  = open("./ressources/common.css", "r")
@@ -213,7 +225,8 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	file3.close()
 	
 	epub.write("./tmp/common.css", "OEBPS/common.css")
-	os.remove("./tmp/common.css")
+	try: os.remove("./tmp/common.css")
+	except: {}
 	epub.write("./ressources/fonts/"+font+"/Regular.ttf", "OEBPS/Regular.ttf")
 	epub.write("./ressources/fonts/"+font+"/Bold.ttf", "OEBPS/Bold.ttf")
 	epub.write("./ressources/fonts/"+font+"/Bold-Italic.ttf", "OEBPS/Bold-Italic.ttf")
@@ -223,7 +236,8 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 
 	#removes all the temporary files
 	for x in html_files:
-		os.remove(x)
+		try: os.remove(x)
+		except: {}
 
 def generate_toc(html_files, novel):
 	#Generates a Table of Contents + lost strings
