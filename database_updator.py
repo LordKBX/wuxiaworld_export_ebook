@@ -15,7 +15,7 @@ import sqlite3 as sql
 from bs4 import BeautifulSoup
 import re
 
-
+parent = None
 
 conn = None
 cursor = None
@@ -62,6 +62,8 @@ def download(link, file_name):
 def insert_novel(name, url):
 	global conn, cursor, alt_cover_list, exception_names_list, limited_novel_list
 	limit = 0
+	translator=''
+	synopsis=''
 	if name in limited_novel_list: limit = 1
 	filename = "./tmp/novel_"+urllib.parse.quote(name)+".html"
 	if name in exception_names_list: down = "https://www.novelupdates.com/series/"+exception_names_list[name]+"/"
@@ -78,17 +80,44 @@ def insert_novel(name, url):
 		# Not an HTTP-specific error (e.g. connection refused)
 		print('URL: {}, URLError: {}'.format(down, e.reason))
 	else:
+		#translator retrieving
+		filename2 = "./tmp/novel_"+urllib.parse.quote(name)+"_2.html"
+		try:
+			download(url, filename2)
+		except HTTPError as e:
+			print('URL: {}, HTTPError: {} - {}'.format(down, e.code, e.reason))
+		except URLError as e:
+			print('URL: {}, URLError: {}'.format(down, e.reason))
+		else:
+			fileHandle = open(filename2, "r", encoding = "utf8")
+			soup = BeautifulSoup(fileHandle, 'html.parser')
+			nov = soup.find(class_='media media-novel-index')
+			dom_translators = nov.find_all('dl')
+			for aut in dom_translators:
+				if len(aut.contents) >= 1:
+					strmade = ''
+					for piece in aut.contents:
+						if piece.string is not None:
+							strmade += piece.string
+					if 'Translator:' in strmade:
+						clean = strmade.replace('Translator:', '').replace("\n", '').replace("\r", '').replace("\t", '').strip()
+						if clean not in translator:
+							if translator != '': translator += ', '
+							translator += clean
+			fileHandle.close();
+			os.remove(filename2)
 		fileHandle = open(filename, "r", encoding = "utf8")
 		soup = BeautifulSoup(fileHandle, 'html.parser')
 		if name in alt_cover_list:
 			img = alt_cover_list[name]
 		else: img = soup.find(class_='seriesimg').find('img').get('src')
+		synopsis = soup.find(id='editdescription').get_text()
 		autors = ''
 		dom_authors = soup.find(id='showauthors').find_all('a')
 		for aut in dom_authors:
 			if autors != '': autors += ', '
 			autors += aut.string
-		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited) VALUES(?,?,?,?,?)", (name, url, autors, img, limit))
+		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited,translator,synopsis) VALUES(?,?,?,?,?,?,?)", (name, url, autors, img, limit, translator, synopsis))
 		conn.commit()
 		fileHandle.close();
 		os.remove(filename)
@@ -97,6 +126,8 @@ def insert_novel2(name, url):
 	global conn, cursor, alt_cover_list, limited_novel_list
 	limit = 0
 	if name in limited_novel_list: limit = 1
+	translator=''
+	synopsis=''
 	
 	filename = "./tmp/novel_"+urllib.parse.quote(name)+"_2.html"
 	down = url
@@ -127,21 +158,25 @@ def insert_novel2(name, url):
 					if clean not in autors:
 						if autors != '': autors += ', '
 						autors += clean
-		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited) VALUES(?,?,?,?,?)", (name, url, autors, img, limit))
+		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited,translator,synopsis) VALUES(?,?,?,?,?,?,?)", (name, url, autors, img, limit, translator, synopsis))
 		conn.commit()
 		fileHandle.close();
 		os.remove(filename)
 		 
 def start():
-	global conn, cursor
+	global conn, cursor, parent
 	conn = sql.connect("novels.db")
 	cursor = conn.cursor()
 	
 	if os.path.isdir('./tmp') is False:
 		os.mkdir('./tmp')
+		
+	list_novel = []
 	
 	filename = "./tmp/bdd_updates.html"
 	baseurl = 'https://www.wuxiaworld.com/updates'
+	if parent is not None: parent.emit(['Database Update, Download Ongoing novel list', 1])
+	else: print('>> Download Ongoing novel list')
 	try:
 		download(baseurl, filename)
 	except HTTPError as e:
@@ -161,16 +196,14 @@ def start():
 			for title in novels_dom:
 				name = title.find('a').string.replace('’', "'").strip()
 				url = title.find('a').get('href')
-				cursor.execute("SELECT NovelName,link,autor,cover FROM 'Information' WHERE NovelName LIKE ?", (name,))
-				row = cursor.fetchone()
-				if row is None:
-					print('=> Processing:', name)
-					insert_novel(name, 'https://www.wuxiaworld.com'+url)
+				list_novel.append({'name': name, 'url': 'https://www.wuxiaworld.com'+url})
 		fileHandle.close()
 		os.remove(filename)
 		
 		filename = "./tmp/bdd_completed.html"
 		baseurl = 'https://www.wuxiaworld.com/tag/completed'
+		if parent is not None: parent.emit(['Database Update, Download Finished novel list', 2])
+		else: print('>> Download Finished novel list')
 		try:
 			download(baseurl, filename)
 		except HTTPError as e:
@@ -188,13 +221,16 @@ def start():
 				name = title.find('h4').string.replace('’', "'").strip()
 				if name not in exclusion_novel_list:
 					url = title.find('a').get('href')
-					cursor.execute("SELECT NovelName,link,autor,cover FROM 'Information' WHERE NovelName LIKE ?", (name,))
-					row = cursor.fetchone()
-					if row is None:
-						print('=> Processing:', name)
-						insert_novel(name, 'https://www.wuxiaworld.com'+url)
+					list_novel.append({'name': name, 'url': 'https://www.wuxiaworld.com'+url})
 			fileHandle.close()
 			os.remove(filename)
+			
+		pos = 2
+		for novel in list_novel:
+			pos += 1
+			if parent is not None: parent.emit(['Database Update, Processing "{}"'.format(novel['name']), pos])
+			else: print('=> Processing:', novel['name'])
+			insert_novel(novel['name'], novel['url'])
 			
 		cursor = None
 		conn.close()

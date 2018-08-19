@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>125</height>
+    <height>104</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>500</width>
-    <height>125</height>
+    <height>100</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>500</width>
-    <height>125</height>
+    <height>104</height>
    </size>
   </property>
   <property name="contextMenuPolicy">
@@ -84,13 +84,13 @@ background-position:center;</string>
        <property name="minimumSize">
         <size>
          <width>398</width>
-         <height>90</height>
+         <height>65</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
          <width>398</width>
-         <height>90</height>
+         <height>65</height>
         </size>
        </property>
        <property name="font">
@@ -121,6 +121,9 @@ background-position:center;</string>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
        <item>
         <spacer name="horizontalSpacer">
          <property name="orientation">
@@ -132,7 +135,7 @@ background-position:center;</string>
          <property name="sizeHint" stdset="0">
           <size>
            <width>40</width>
-           <height>35</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -164,7 +167,7 @@ background-position:center;</string>
          <property name="sizeHint" stdset="0">
           <size>
            <width>5</width>
-           <height>20</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>

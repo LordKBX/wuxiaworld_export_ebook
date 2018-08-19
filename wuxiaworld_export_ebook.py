@@ -22,11 +22,13 @@ cursor = None
 novel = ''
 data_novel = {}
 app = None
+app_icon =None
 dialog = None
 generating = False
 styleUpdateGrey = "background-color:#CCCCCC;color:#000000;"
 styleUpdateGreen = 'background-color:#55AA00;color: #ffffff;'
 threadpool = None
+outdatedScript = False
 
 class WorkerSignals(QtCore.QObject):
     '''
@@ -96,6 +98,16 @@ class Worker(QtCore.QRunnable):
             self.signals.result.emit(result)  # Return the result of the processing
         finally:
             self.signals.finished.emit() 
+	
+def worker_progress(status):
+	updateStatus(status[0])
+	try: print(status[0])
+	except: {}
+	try: dialog.statusProgressBar.setProperty("value", status[1])
+	except: {}
+
+def worker_print_output(s):
+	print(s)
 
 def exitWindow():
 	global generating
@@ -104,29 +116,37 @@ def exitWindow():
 	
 def updateStatus(message:str, green=False):
 	global dialog, styleUpdateGrey, styleUpdateGreen
-	if green is True: dialog.statusLabel.setStyleSheet(interface._fromUtf8(styleUpdateGreen))
-	else: dialog.statusLabel.setStyleSheet(interface._fromUtf8(styleUpdateGrey))
-	dialog.statusLabel.setText(message)
+	try:
+		if green is True: dialog.statusLabel.setStyleSheet(interface._fromUtf8(styleUpdateGreen))
+		else: dialog.statusLabel.setStyleSheet(interface._fromUtf8(styleUpdateGrey))
+		dialog.statusLabel.setText(message)
+	except:{}
 	
-def infoDialog(title, message):
+def infoDialog(title, message, modal=True):
+	global app_icon
+	#if modal is True:
 	dialog = infoBox.Ui_Dialog()
 	window = QtGui.QDialog()
 	dialog.setupUi(window)
-	app_icon = QtGui.QIcon()
-	app_icon.addFile('ressources/icon16x16.png', QtCore.QSize(16,16))
-	app_icon.addFile('ressources/icon24x24.png', QtCore.QSize(24,24))
-	app_icon.addFile('ressources/icon32x32.png', QtCore.QSize(32,32))
-	app_icon.addFile('ressources/icon48x48.png', QtCore.QSize(48,48))
-	app_icon.addFile('ressources/icon256x256.png', QtCore.QSize(256,256))
 	window.setWindowTitle(title)
 	window.setWindowIcon(app_icon)
 	window.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
 	dialog.label_2.setText(message)
 	dialog.pushButton.clicked.connect(window.close)
 	window.exec_()
-	
+
 def check_script_version():
+	global outdatedScript
+	outdatedScript = False
 	print('> Check script update')
+	worker = Worker(check_script_version_mid) # Any other args, kwargs are passed to the run function
+	worker.signals.finished.connect(check_script_version_end)
+	worker.signals.progress.connect(worker_progress)
+	threadpool.start(worker)
+
+
+def check_script_version_mid(progress_callback):
+	global outdatedScript
 	file_version_online = './check_version.txt'
 	try:
 		getify.download('https://raw.githubusercontent.com/LordKBX/wuxiaworld_export_ebook/master/version.txt', file_version_online)
@@ -144,15 +164,52 @@ def check_script_version():
 		file1.close()
 		file2.close()
 		if version_locale not in version_online:
-			infoDialog('Update', "A new version of the script is online\nhttps://github.com/LordKBX/wuxiaworld_export_ebook")
-		else: print('< Script up to date')
-		
+			outdatedScript = True
+
+def check_script_version_end():
+	global outdatedScript
+	if outdatedScript is True:
+		infoDialog('Update', "A new version of the script is online\nhttps://github.com/LordKBX/wuxiaworld_export_ebook")
+	else: print('< Script up to date')
+
 def check_database():
+	global generating
 	if time.time() - float(os.path.getmtime("novels.db")) >= 43200.0: #test 43200 = 12h
-		print('> Updating Novel Database')
-		database_updator.start()
-		os.utime("novels.db")
+		generating = True
+		worker = Worker(check_database_mid) # Any other args, kwargs are passed to the run function
+		worker.signals.finished.connect(check_database_end)
+		worker.signals.progress.connect(worker_progress)
+		threadpool.start(worker)
+		infoDialog('Info', 'Start database update', False)
+	else: check_database_final()
 		
+def check_database_mid(progress_callback):
+	print('> Updating Novel Database')
+	database_updator.parent = progress_callback
+	database_updator.start()
+
+def check_database_end():
+	os.utime("novels.db")
+	status = "Database Update, Task finished at {}".format(time.asctime())
+	updateStatus(status, True)
+	print(status)
+	dialog.statusProgressBar.setProperty("value", 100)
+	check_database_final()
+
+def check_database_final():
+	global conn, cursor, generating
+	generating = False
+	conn = sql.connect("novels.db")
+	cursor = conn.cursor()
+	cursor.execute("SELECT NovelName FROM 'Information' ORDER BY NovelName ASC")
+	db = cursor.fetchall()
+	namelist = ['']
+	for i in db:
+		namelist.append(i[0])
+		namelist.sort()
+	dialog.novelSelector.clear()
+	dialog.novelSelector.addItems(namelist)
+
 def changeFont():
 	global dialog
 	curFont = dialog.fontSelector.currentText()
@@ -206,7 +263,6 @@ def changeNovel():
 	novel = dialog.novelSelector.currentText()
 	if novel != "":
 		lockInterface()
-		print(dialog.novelSelector.currentText())
 		cursor.execute("SELECT link,autor,cover,limited FROM 'Information' WHERE NovelName LIKE ?", (novel,))
 		db = cursor.fetchall()
 		data_novel={}
@@ -344,22 +400,12 @@ def generate():
 	generating = True
 	
 	worker = Worker(generate_mid) # Any other args, kwargs are passed to the run function
-	worker.signals.result.connect(generate_print_output)
+	worker.signals.result.connect(worker_print_output)
 	worker.signals.finished.connect(generate_end)
-	worker.signals.progress.connect(generate_progress)
+	worker.signals.progress.connect(worker_progress)
 
 	# Execute
 	threadpool.start(worker)
-	
-def generate_progress(status):
-	updateStatus(status[0])
-	try: print(status[0])
-	except: {}
-	try: dialog.statusProgressBar.setProperty("value", status[1])
-	except: {}
-
-def generate_print_output(s):
-	print(s)
 	
 def generate_mid(progress_callback):
 	global dialog, novel, data_novel
@@ -518,12 +564,10 @@ def generate_end():
 
 if __name__ == '__main__':
 	threadpool = QtCore.QThreadPool()
-	print("Multithreading with maximum {} threads".format(threadpool.maxThreadCount()))
 	myappid = 'wuxiaworld.epubcreator.qt4.2' # arbitrary string
 	if os.name == 'nt': ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 	app = QtGui.QApplication([])
 	
-	check_database()
 	
 	dir = os.path.dirname(os.path.realpath(__file__))
 	app_icon = QtGui.QIcon()
@@ -539,15 +583,8 @@ if __name__ == '__main__':
 	dialog.setupUi(window)
 	window.show()
 	
-	conn = sql.connect("novels.db")
-	cursor = conn.cursor()
-	cursor.execute("SELECT NovelName FROM 'Information' ORDER BY NovelName ASC")
-	db = cursor.fetchall()
-	namelist = ['']
-	for i in db:
-		namelist.append(i[0])
-		namelist.sort()
-		
+	check_database()
+	
 	fontsList = []
 	fontindex = 0
 	fontmax = 0
@@ -568,8 +605,6 @@ if __name__ == '__main__':
 	
 	#set values
 	updateStatus('')
-	dialog.novelSelector.clear()
-	dialog.novelSelector.addItems(namelist)
 	
 	dialog.fontSelector.clear()
 	dialog.fontSelector.addItems(fontsList)
