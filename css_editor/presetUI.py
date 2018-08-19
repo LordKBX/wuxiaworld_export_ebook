@@ -32,9 +32,7 @@ class Ui_Dialog(object):
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.label = QtGui.QLabel(Dialog)
         self.label.setMaximumSize(QtCore.QSize(80, 30))
-        self.label.setStyleSheet(_fromUtf8("padding-left:5px;\n"
-"background-color: rgb(157, 157, 157);\n"
-"color:rgb(0, 0, 0);"))
+        self.label.setStyleSheet(_fromUtf8("background-color: rgb(204, 204, 204);padding-left:5px;"))
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout.addWidget(self.label)
         self.comboBox = QtGui.QComboBox(Dialog)

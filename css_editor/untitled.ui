@@ -291,7 +291,7 @@ padding-left:6px;</string>
             </size>
            </property>
            <property name="text">
-            <string>Load preset</string>
+            <string>&amp;Load preset</string>
            </property>
           </widget>
          </item>
@@ -342,7 +342,7 @@ padding-left:6px;</string>
             </size>
            </property>
            <property name="text">
-            <string>Save</string>
+            <string>&amp;Save</string>
            </property>
           </widget>
          </item>

@@ -165,8 +165,8 @@ class Ui_Dialog(object):
         self.radioButton_chapter1.setText(_translate("Dialog", "Chapter1", None))
         self.label_2.setText(_translate("Dialog", "HTML code", None))
         self.label.setText(_translate("Dialog", "CSS Style", None))
-        self.presetButton.setText(_translate("Dialog", "Load preset", None))
+        self.presetButton.setText(_translate("Dialog", "&Load preset", None))
         self.pushButtonPreview.setText(_translate("Dialog", "&Preview", None))
-        self.pushButtonSave.setText(_translate("Dialog", "Save", None))
+        self.pushButtonSave.setText(_translate("Dialog", "&Save", None))
 
 from PyQt4 import QtWebKit
