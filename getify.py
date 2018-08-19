@@ -104,7 +104,7 @@ def cover_generator(src, novel, book_name, author):
 	file3.close()
 		
 	try:
-		call([sys.executable, "webkit2png_exec.py", "-o", "tmp/cover.png", "./tmp/jacket.xhtml"])
+		call([sys.executable, "cover_generator/exec.py", "-o", "./tmp/cover.png", "./tmp/jacket.xhtml"])
 	except RuntimeError as e:
 		traceback.print_exc()
 		

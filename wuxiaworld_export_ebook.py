@@ -7,9 +7,9 @@ from urllib.error import HTTPError, URLError
 import time
 import subprocess
 from PyQt4 import QtCore, QtGui
-import r_rc
 import ctypes
 
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + os.sep + 'interfaces')
 import interface
 import infoBox
 import novel_data
@@ -31,73 +31,72 @@ threadpool = None
 outdatedScript = False
 
 class WorkerSignals(QtCore.QObject):
-    '''
-    Defines the signals available from a running worker thread.
+	'''
+	Defines the signals available from a running worker thread.
 
-    Supported signals are:
+	Supported signals are:
 
-    finished
-        No data
+	finished
+		No data
 
-    error
-        `tuple` (exctype, value, traceback.format_exc() )
+	error
+		`tuple` (exctype, value, traceback.format_exc() )
 
-    result
-        `object` data returned from processing, anything
+	result
+		`object` data returned from processing, anything
 
-    progress
-        `int` indicating % progress
+	progress
+		`int` indicating % progress
 
-    '''
-    finished = QtCore.pyqtSignal()
-    error = QtCore.pyqtSignal(tuple)
-    result = QtCore.pyqtSignal(object)
-    progress = QtCore.pyqtSignal(list)
-
+	'''
+	finished = QtCore.pyqtSignal()
+	error = QtCore.pyqtSignal(tuple)
+	result = QtCore.pyqtSignal(object)
+	progress = QtCore.pyqtSignal(list)
 
 class Worker(QtCore.QRunnable):
-    '''
-    Worker thread
+	'''
+	Worker thread
 
-    Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
+	Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
 
-    :param callback: The function callback to run on this worker thread. Supplied args and 
-                     kwargs will be passed through to the runner.
-    :type callback: function
-    :param args: Arguments to pass to the callback function
-    :param kwargs: Keywords to pass to the callback function
+	:param callback: The function callback to run on this worker thread. Supplied args and 
+					 kwargs will be passed through to the runner.
+	:type callback: function
+	:param args: Arguments to pass to the callback function
+	:param kwargs: Keywords to pass to the callback function
 
-    '''
+	'''
 
-    def __init__(self, fn, *args, **kwargs):
-        super(Worker, self).__init__()
+	def __init__(self, fn, *args, **kwargs):
+		super(Worker, self).__init__()
 
-        # Store constructor arguments (re-used for processing)
-        self.fn = fn
-        self.args = args
-        self.kwargs = kwargs
-        self.signals = WorkerSignals()
+		# Store constructor arguments (re-used for processing)
+		self.fn = fn
+		self.args = args
+		self.kwargs = kwargs
+		self.signals = WorkerSignals()
 
-        # Add the callback to our kwargs
-        self.kwargs['progress_callback'] = self.signals.progress
+		# Add the callback to our kwargs
+		self.kwargs['progress_callback'] = self.signals.progress
 
-    @QtCore.pyqtSlot()
-    def run(self):
-        '''
-        Initialise the runner function with passed args, kwargs.
-        '''
+	@QtCore.pyqtSlot()
+	def run(self):
+		'''
+		Initialise the runner function with passed args, kwargs.
+		'''
 
-        # Retrieve args/kwargs here; and fire processing using them
-        try:
-            result = self.fn(*self.args, **self.kwargs)
-        except:
-            traceback.print_exc()
-            exctype, value = sys.exc_info()[:2]
-            self.signals.error.emit((exctype, value, traceback.format_exc()))
-        else:
-            self.signals.result.emit(result)  # Return the result of the processing
-        finally:
-            self.signals.finished.emit() 
+		# Retrieve args/kwargs here; and fire processing using them
+		try:
+			result = self.fn(*self.args, **self.kwargs)
+		except:
+			traceback.print_exc()
+			exctype, value = sys.exc_info()[:2]
+			self.signals.error.emit((exctype, value, traceback.format_exc()))
+		else:
+			self.signals.result.emit(result)  # Return the result of the processing
+		finally:
+			self.signals.finished.emit() 
 	
 def worker_progress(status):
 	updateStatus(status[0])
@@ -169,7 +168,7 @@ def check_script_version_mid(progress_callback):
 def check_script_version_end():
 	global outdatedScript
 	if outdatedScript is True:
-		infoDialog('Update', "A new version of the script is online\nhttps://github.com/LordKBX/wuxiaworld_export_ebook")
+		infoDialog('Update', '<html><head/><body><p>A new version of the script is online</p><p><a href="https://github.com/LordKBX/wuxiaworld_export_ebook"><span style=" text-decoration: underline; color:#0000ff;">https://github.com/LordKBX/wuxiaworld_export_ebook</span></a></p></body></html>')
 	else: print('< Script up to date')
 
 def check_database():
@@ -561,6 +560,7 @@ def generate_end():
 		dialog.endingChapterSelector.setEnabled(True)
 	generating = False
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+	subprocess.Popen('explorer "' + os.path.dirname(os.path.realpath(__file__)) + os.sep + 'export' + '"')
 
 if __name__ == '__main__':
 	threadpool = QtCore.QThreadPool()

@@ -65,6 +65,8 @@ class Ui_Dialog(object):
         self.label_2.setStyleSheet(_fromUtf8(""))
         self.label_2.setScaledContents(False)
         self.label_2.setWordWrap(True)
+        self.label_2.setOpenExternalLinks(True)
+        self.label_2.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.verticalLayout.addWidget(self.label_2)
         self.horizontalLayout = QtGui.QHBoxLayout()

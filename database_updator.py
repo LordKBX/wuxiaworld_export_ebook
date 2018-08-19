@@ -59,38 +59,55 @@ def download(link, file_name):
 	with urllib.request.urlopen(url) as response, open(file_name, 'wb') as out_file:
 		 shutil.copyfileobj(response, out_file)
 		 
-def insert_novel(name, url):
+def insert_wuxiaworld_novel(name, url):
 	global conn, cursor, alt_cover_list, exception_names_list, limited_novel_list
+	#name
+	#url
+	autors = ''
+	img = ''
 	limit = 0
-	translator=''
-	synopsis=''
 	if name in limited_novel_list: limit = 1
-	filename = "./tmp/novel_"+urllib.parse.quote(name)+".html"
-	if name in exception_names_list: down = "https://www.novelupdates.com/series/"+exception_names_list[name]+"/"
-	else: down = "https://www.novelupdates.com/series/"+name.lower().replace("&", 'and').replace("'", '').replace(" ", '-')+"/"
-	try:
-		download(down, filename)
-	except HTTPError as e:
-		# Return code error (e.g. 404, 501, ...)
-		if e.code == 404:
-			insert_novel2(name, url)
-		else:
-			print('URL: {}, HTTPError: {} - {}'.format(down, e.code, e.reason))
-	except URLError as e:
-		# Not an HTTP-specific error (e.g. connection refused)
-		print('URL: {}, URLError: {}'.format(down, e.reason))
+	translator = ''
+	synopsis = ''
+	
+	filename_novelupdate = "./tmp/novel_"+urllib.parse.quote(name)+".html"
+	filename_wuxiaworld = "./tmp/wuxia_"+urllib.parse.quote(name)+".html"
+	
+	url_novelupdate = ''
+	if name in exception_names_list: url_novelupdate = "https://www.novelupdates.com/series/"+exception_names_list[name]+"/"
+	else: url_novelupdate = "https://www.novelupdates.com/series/"+name.lower().replace("&", 'and').replace("'", '').replace(" ", '-')+"/"
+	
+	try: download(url, filename_wuxiaworld)
+	except Exception as e:
+		print('URL: {}, URLError: {} - {}'.format(url, e.code, e.reason))
 	else:
-		#translator retrieving
-		filename2 = "./tmp/novel_"+urllib.parse.quote(name)+"_2.html"
-		try:
-			download(url, filename2)
-		except HTTPError as e:
-			print('URL: {}, HTTPError: {} - {}'.format(down, e.code, e.reason))
-		except URLError as e:
-			print('URL: {}, URLError: {}'.format(down, e.reason))
+		if limit == 1: filename_novelupdate = None
 		else:
-			fileHandle = open(filename2, "r", encoding = "utf8")
-			soup = BeautifulSoup(fileHandle, 'html.parser')
+			try: download(url_novelupdate, filename_novelupdate)
+			except Exception as e:
+				print('URL: {}, URLError: {} - {}'.format(url_novelupdate, e.code, e.reason))
+				filename_novelupdate = None
+		
+		fileHandle1 = open(filename_wuxiaworld, "r", encoding = "utf8")
+		if filename_novelupdate is not None:
+			#Get data from novelupdates.com
+			fileHandle2 = open(filename_novelupdate, "r", encoding = "utf8")
+			soup = BeautifulSoup(fileHandle2, 'html.parser')
+			if name in alt_cover_list:
+				img = alt_cover_list[name]
+			else: img = soup.find(class_='seriesimg').find('img').get('src')
+			synopsis = soup.find(id='editdescription').get_text()
+			autors = ''
+			dom_authors = soup.find(id='showauthors').find_all('a')
+			for aut in dom_authors:
+				if autors != '': autors += ', '
+				autors += aut.string
+			soup = None
+			fileHandle2.close()
+			os.remove(filename_novelupdate)
+			
+			#Get data from wuxiaworld.com
+			soup = BeautifulSoup(fileHandle1, 'html.parser')
 			nov = soup.find(class_='media media-novel-index')
 			dom_translators = nov.find_all('dl')
 			for aut in dom_translators:
@@ -104,65 +121,48 @@ def insert_novel(name, url):
 						if clean not in translator:
 							if translator != '': translator += ', '
 							translator += clean
-			fileHandle.close();
-			os.remove(filename2)
-		fileHandle = open(filename, "r", encoding = "utf8")
-		soup = BeautifulSoup(fileHandle, 'html.parser')
-		if name in alt_cover_list:
-			img = alt_cover_list[name]
-		else: img = soup.find(class_='seriesimg').find('img').get('src')
-		synopsis = soup.find(id='editdescription').get_text()
-		autors = ''
-		dom_authors = soup.find(id='showauthors').find_all('a')
-		for aut in dom_authors:
-			if autors != '': autors += ', '
-			autors += aut.string
+			soup = None
+			fileHandle1.close();
+			os.remove(filename_wuxiaworld)
+		else:
+			#Get data from wuxiaworld.com
+			soup = BeautifulSoup(fileHandle1, 'html.parser')
+			nov = soup.find(class_='media media-novel-index')
+			if name in alt_cover_list: img = alt_cover_list[name]
+			else: img = nov.find('img').get('src')
+			dom_authors = nov.find_all('p')
+			dom_authors += nov.find_all('dl')
+			for aut in dom_authors:
+				if len(aut.contents) >= 1:
+					strmade = ''
+					for piece in aut.contents:
+						if piece.string is not None:
+							strmade += piece.string
+					if 'Author:' in strmade or 'Translator:' in strmade:
+						clean = strmade.replace('Author:', '').replace('Translator:', '').replace("\n", '').replace("\r", '').replace("\t", '').strip()
+						if clean not in autors:
+							if autors != '': autors += ', '
+							autors += clean
+							
+			dom_translators = nov.find_all('dl')
+			for aut in dom_translators:
+				if len(aut.contents) >= 1:
+					strmade = ''
+					for piece in aut.contents:
+						if piece.string is not None:
+							strmade += piece.string
+					if 'Translator:' in strmade:
+						clean = strmade.replace('Translator:', '').replace("\n", '').replace("\r", '').replace("\t", '').strip()
+						if clean not in translator and clean not in autors:
+							if translator != '': translator += ', '
+							translator += clean
+			
+			fileHandle1.close();
+			os.remove(filename_wuxiaworld)
+			
 		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited,translator,synopsis) VALUES(?,?,?,?,?,?,?)", (name, url, autors, img, limit, translator, synopsis))
 		conn.commit()
-		fileHandle.close();
-		os.remove(filename)
-		 
-def insert_novel2(name, url):
-	global conn, cursor, alt_cover_list, limited_novel_list
-	limit = 0
-	if name in limited_novel_list: limit = 1
-	translator=''
-	synopsis=''
-	
-	filename = "./tmp/novel_"+urllib.parse.quote(name)+"_2.html"
-	down = url
-	try:
-		download(down, filename)
-	except HTTPError as e:
-		print('URL: {}, HTTPError: {} - {}'.format(down, e.code, e.reason))
-	except URLError as e:
-		print('URL: {}, URLError: {}'.format(down, e.reason))
-	else:
-		fileHandle = open(filename, "r", encoding = "utf8")
-		soup = BeautifulSoup(fileHandle, 'html.parser')
-		nov = soup.find(class_='media media-novel-index')
-		if name in alt_cover_list:
-			img = alt_cover_list[name]
-		else: img = nov.find('img').get('src')
-		autors = ''
-		dom_authors = nov.find_all('p')
-		dom_authors += nov.find_all('dl')
-		for aut in dom_authors:
-			if len(aut.contents) >= 1:
-				strmade = ''
-				for piece in aut.contents:
-					if piece.string is not None:
-						strmade += piece.string
-				if 'Author:' in strmade or 'Translator:' in strmade:
-					clean = strmade.replace('Author:', '').replace('Translator:', '').replace("\n", '').replace("\r", '').replace("\t", '').strip()
-					if clean not in autors:
-						if autors != '': autors += ', '
-						autors += clean
-		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited,translator,synopsis) VALUES(?,?,?,?,?,?,?)", (name, url, autors, img, limit, translator, synopsis))
-		conn.commit()
-		fileHandle.close();
-		os.remove(filename)
-		 
+
 def start():
 	global conn, cursor, parent
 	conn = sql.connect("novels.db")
@@ -175,8 +175,8 @@ def start():
 	
 	filename = "./tmp/bdd_updates.html"
 	baseurl = 'https://www.wuxiaworld.com/updates'
-	if parent is not None: parent.emit(['Database Update, Download Ongoing novel list', 1])
-	else: print('>> Download Ongoing novel list')
+	if parent is not None: parent.emit(['Database Update, Download Wuxiaworld Ongoing novel list', 1])
+	else: print('>> Download Wuxiaworld Ongoing novel list')
 	try:
 		download(baseurl, filename)
 	except HTTPError as e:
@@ -202,8 +202,8 @@ def start():
 		
 		filename = "./tmp/bdd_completed.html"
 		baseurl = 'https://www.wuxiaworld.com/tag/completed'
-		if parent is not None: parent.emit(['Database Update, Download Finished novel list', 2])
-		else: print('>> Download Finished novel list')
+		if parent is not None: parent.emit(['Database Update, Download Wuxiaworld Finished novel list', 2])
+		else: print('>> Download Wuxiaworld Finished novel list')
 		try:
 			download(baseurl, filename)
 		except HTTPError as e:
@@ -230,7 +230,7 @@ def start():
 			pos += 1
 			if parent is not None: parent.emit(['Database Update, Processing "{}"'.format(novel['name']), pos])
 			else: print('=> Processing:', novel['name'])
-			insert_novel(novel['name'], novel['url'])
+			insert_wuxiaworld_novel(novel['name'], novel['url'])
 			
 		cursor = None
 		conn.close()
