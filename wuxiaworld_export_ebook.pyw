@@ -162,7 +162,8 @@ def check_script_version_mid(progress_callback):
 		version_online = file2.read()
 		file1.close()
 		file2.close()
-		if version_locale not in version_online:
+		os.remove(file_version_online)
+		if version_locale.strip() not in version_online.strip():
 			outdatedScript = True
 
 def check_script_version_end():
