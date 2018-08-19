@@ -3,9 +3,11 @@ import sys
 import os
 import os.path
 import ctypes
-import interface
-import syntax
 from bs4 import BeautifulSoup
+
+import interface
+import presetUI
+import syntax
 
 try:
 	_fromUtf8 = QtCore.QString.fromUtf8
@@ -15,6 +17,8 @@ except AttributeError:
 
 app = None
 dialog = None
+dialog2 = None
+window2 = None
 urlBase = 'file://'+os.path.dirname(os.path.dirname(os.path.realpath(__file__))).replace('\\', '/')
 urlBase_clean = os.path.dirname(os.path.dirname(os.path.realpath(__file__))).replace('\\', '/')
 highlightTimer = None
@@ -74,6 +78,53 @@ def clickSave():
 	file3.write(text)
 	file3.close()
 	dialog.webView.reload()
+	
+def load_preset():
+	global urlBase_clean, dialog2, window2
+	dialog2 = presetUI.Ui_Dialog()
+	window2 = QtGui.QDialog()
+	dialog2.setupUi(window2)
+	window2.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
+	
+	themes = []
+	index = 0
+	pos = 0
+	for x in os.listdir(urlBase_clean+'/ressources/themes'):
+		if os.path.isdir(urlBase_clean+'/ressources/themes/'+x) is False: 
+			themes.append(x.replace('.css', ''))
+			if x == 'default.css':
+				pos = index
+			index += 1
+	dialog2.comboBox.clear()
+	dialog2.comboBox.addItems(themes)
+	dialog2.comboBox.setCurrentIndex(pos)
+	
+	dialog2.pushButton.clicked.connect(load_preset2)#signal
+	
+	window2.exec_()
+	
+def load_preset2():
+	global dialog, dialog2, window2
+	style = dialog2.comboBox.currentText()
+	print(style)
+	
+	file2  = open(urlBase_clean+"/ressources/themes/"+style+".css", "r")
+	css = file2.read()
+	file2.close()
+	dialog.textEdit.setPlainText(css)
+	
+	window2.close()
+	dialog2 = None
+	window2 = None
+	clickPreview()
+
+class MyWindow(QtGui.QDialog):
+	def closeEvent(self,event):
+		event.ignore()
+		result = QtGui.QMessageBox.question(self, "Confirm Exit...", "Are you sure you want to exit ?", QtGui.QMessageBox.Yes| QtGui.QMessageBox.No)
+		
+		if result == QtGui.QMessageBox.Yes:
+			event.accept()
 
 if __name__ == '__main__':
 	myappid = 'wuxiaworld.epubcreator.qt4.2' # arbitrary string
@@ -88,7 +139,7 @@ if __name__ == '__main__':
 	app_icon.addFile(dir+'/ressources/icon256x256.png', QtCore.QSize(256,256))
 	app.setWindowIcon(app_icon)
 	dialog = interface.Ui_Dialog()
-	window = QtGui.QDialog()
+	window = MyWindow()
 	dialog.setupUi(window)
 	window.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
 	
@@ -96,6 +147,7 @@ if __name__ == '__main__':
 	dialog.radioButton_chapter1.clicked.connect(changePage)#signal
 	dialog.pushButtonPreview.clicked.connect(clickPreview)#signal
 	dialog.pushButtonSave.clicked.connect(clickSave)#signal
+	dialog.presetButton.clicked.connect(load_preset)#signal
 	
 	file1  = open(urlBase_clean+"/ressources/loading_fonts.txt", "r")
 	file2  = open(urlBase_clean+"/ressources/common.css", "r")

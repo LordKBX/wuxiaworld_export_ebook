@@ -277,6 +277,25 @@ padding-left:6px;</string>
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="presetButton">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Load preset</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -297,6 +316,12 @@ padding-left:6px;</string>
              <height>30</height>
             </size>
            </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>30</height>
+            </size>
+           </property>
            <property name="text">
             <string>&amp;Preview</string>
            </property>
@@ -307,6 +332,12 @@ padding-left:6px;</string>
            <property name="minimumSize">
             <size>
              <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
              <height>30</height>
             </size>
            </property>

@@ -163,6 +163,8 @@ def check_script_version_mid(progress_callback):
 		file1.close()
 		file2.close()
 		os.remove(file_version_online)
+		# print('local="{}"'.format(version_locale.strip()))
+		# print('online="{}"'.format(version_online.strip()))
 		if version_locale.strip() not in version_online.strip():
 			outdatedScript = True
 
@@ -610,6 +612,10 @@ if __name__ == '__main__':
 		clean_folder(dir+os.sep+'tmp')
 		check_database()
 		check_script_version()
+		checkVersionTimer = QtCore.QTimer()
+		checkVersionTimer.timeout.connect(check_script_version)
+		checkVersionTimer.setInterval(3600000)#Check if script up to date every hours
+		checkVersionTimer.start()
 	else:
 		print('Script in no update mode')
 		check_database_final()

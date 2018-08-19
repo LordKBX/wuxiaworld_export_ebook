@@ -8,7 +8,7 @@
 
 @font-face { font-family: "<FONT>"; src: url(Bold.ttf); font-weight: bold; }
 
-*{font-family:"<FONT>", sans-serif;}
+*{font-family:"<FONT>", sans-serif;background:#FFE0AA;color:#666666;}
 h1{text-align:center;}
 h2{text-align:center;}
 h3{text-align:center;}
@@ -21,9 +21,10 @@ img{max-width:100%;height:auto;display:block;margin:0 auto;}
 .credits{position:fixed;bottom:10px;left:10px;}
 
 /*Content Page List only*/
-ol{background:#FFB656;padding-top:15px;padding-bottom:15px;}
-ol li{padding:5px;width:calc(100% - 20px);color:#000000;}
-ol li a{color:#000000;}
+ol{background:#77A4FF;padding-top:15px;padding-bottom:15px;}
+ol *{background:#77A4FF;color:#ffffff;}
+ol li{padding:5px;width:calc(100% - 20px);}
+ol li a{}
 
 p{font-weight:100;font-style:normal;}
 p i{font-weight:100;font-style:italic;}
