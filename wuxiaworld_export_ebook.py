@@ -23,6 +23,7 @@ novel = ''
 data_novel = {}
 app = None
 app_icon =None
+window = None
 dialog = None
 generating = False
 styleUpdateGrey = "background-color:#CCCCCC;color:#000000;"
@@ -109,9 +110,8 @@ def worker_print_output(s):
 	print(s)
 
 def exitWindow():
-	global generating
-	if generating is True: return
-	exit(0)
+	global generating, window
+	window.close()
 	
 def updateStatus(message:str, green=False):
 	global dialog, styleUpdateGrey, styleUpdateGreen
@@ -562,6 +562,28 @@ def generate_end():
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
 	subprocess.Popen('explorer "' + os.path.dirname(os.path.realpath(__file__)) + os.sep + 'export' + '"')
 
+def clean_folder(folder):
+	for the_file in os.listdir(folder):
+		file_path = os.path.join(folder, the_file)
+		try:
+			if os.path.isfile(file_path):
+				os.unlink(file_path)
+			#elif os.path.isdir(file_path): shutil.rmtree(file_path)
+		except Exception as e:
+			print(e)
+
+class MyWindow(QtGui.QMainWindow):
+	def closeEvent(self,event):
+		global generating
+		event.ignore()
+		if generating is True: return
+		result = QtGui.QMessageBox.question(self, "Confirm Exit...", "Are you sure you want to exit ?", QtGui.QMessageBox.Yes| QtGui.QMessageBox.No)
+		
+		if result == QtGui.QMessageBox.Yes:
+			event.accept()
+
+
+
 if __name__ == '__main__':
 	threadpool = QtCore.QThreadPool()
 	myappid = 'wuxiaworld.epubcreator.qt4.2' # arbitrary string
@@ -578,12 +600,13 @@ if __name__ == '__main__':
 	app_icon.addFile(dir+'/ressources/icon256x256.png', QtCore.QSize(256,256))
 	app.setWindowIcon(app_icon)
 	dialog = interface.Ui_MainWindow()
-	window = QtGui.QMainWindow()
-	window.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
+	window = MyWindow()
+	window.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
 	dialog.setupUi(window)
 	window.show()
 	
 	if 'noupdate' not in sys.argv:
+		clean_folder(dir+os.sep+'tmp')
 		check_database()
 		check_script_version()
 	else:
@@ -624,6 +647,8 @@ if __name__ == '__main__':
 	dialog.totalExportSlider.valueChanged.connect(export_mode_change)
 	dialog.bookSelector.currentIndexChanged.connect(book_change)
 	dialog.previewButton.clicked.connect(preview)
+	dialog.generateButton.clicked.connect(generate)
+	
 	dialog.generateButton.clicked.connect(generate)
 	
 	sys.exit(app.exec_())
