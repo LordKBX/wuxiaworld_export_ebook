@@ -1,2 +1,2 @@
 @echo off
-start python wuxiaworld_export_ebook.py noupdate
+start python wuxiaworld_export_ebook.pyw noupdate
