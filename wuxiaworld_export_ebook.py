@@ -583,7 +583,12 @@ if __name__ == '__main__':
 	dialog.setupUi(window)
 	window.show()
 	
-	check_database()
+	if 'noupdate' not in sys.argv:
+		check_database()
+		check_script_version()
+	else:
+		print('Script in no update mode')
+		check_database_final()
 	
 	fontsList = []
 	fontindex = 0
@@ -621,5 +626,4 @@ if __name__ == '__main__':
 	dialog.previewButton.clicked.connect(preview)
 	dialog.generateButton.clicked.connect(generate)
 	
-	QtCore.QTimer.singleShot(200, check_script_version)
 	sys.exit(app.exec_())

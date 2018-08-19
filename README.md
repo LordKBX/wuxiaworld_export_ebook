@@ -29,16 +29,15 @@ For PyQt4 on windows use the package at this address https://www.lfd.uci.edu/~go
 ### Usage
 
 Download the script and navigate to the folder using the console then write
-
 ```
 python wuxiaworld_export_ebook.py
 ```
-
 or just use the start.bat file. If you didn't add Python to the PATH variable during the installation or afterwards the write
-
 ```
 path/where/you/installed/python.exe wuxiaworld_export_ebook.py
 ```
+If you whan to start the script without database update and version check you could add the argument noupdate in your command or use the start_without_update.bat
+
 
 After that just select the novel you want to read, select the output mode(classic or alternative), the book number(if applicable) and the chapters range, finaly hit the "Generate" Button.
 Keep it mind that it will take some time for the script to finish, so don't close the window or the console if the program doesn't respond.
