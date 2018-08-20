@@ -61,6 +61,7 @@ def download(link, file_name):
 		 
 def insert_wuxiaworld_novel(name, url):
 	global conn, cursor, alt_cover_list, exception_names_list, limited_novel_list
+	dir = os.path.dirname(os.path.realpath(__file__))
 	#name
 	#url
 	autors = ''
@@ -70,8 +71,8 @@ def insert_wuxiaworld_novel(name, url):
 	translator = ''
 	synopsis = ''
 	
-	filename_novelupdate = "./tmp/novel_"+urllib.parse.quote(name)+".html"
-	filename_wuxiaworld = "./tmp/wuxia_"+urllib.parse.quote(name)+".html"
+	filename_novelupdate = dir+os.sep+"tmp"+os.sep+"novel_"+urllib.parse.quote(name)+".html"
+	filename_wuxiaworld = dir+os.sep+"tmp"+os.sep+"wuxia_"+urllib.parse.quote(name)+".html"
 	
 	url_novelupdate = ''
 	if name in exception_names_list: url_novelupdate = "https://www.novelupdates.com/series/"+exception_names_list[name]+"/"
@@ -165,15 +166,16 @@ def insert_wuxiaworld_novel(name, url):
 
 def start():
 	global conn, cursor, parent
-	conn = sql.connect("novels.db")
+	dir = os.path.dirname(os.path.realpath(__file__))
+	conn = sql.connect(dir+os.sep+"novels.db")
 	cursor = conn.cursor()
 	
-	if os.path.isdir('./tmp') is False:
-		os.mkdir('./tmp')
+	if os.path.isdir(dir+os.sep+'tmp') is False:
+		os.mkdir(dir+os.sep+'tmp')
 		
 	list_novel = []
 	
-	filename = "./tmp/bdd_updates.html"
+	filename = dir+os.sep+"tmp"+os.sep+"bdd_updates.html"
 	baseurl = 'https://www.wuxiaworld.com/updates'
 	if parent is not None: parent.emit(['Database Update, Download Wuxiaworld Ongoing novel list', 1])
 	else: print('>> Download Wuxiaworld Ongoing novel list')
@@ -200,7 +202,7 @@ def start():
 		fileHandle.close()
 		os.remove(filename)
 		
-		filename = "./tmp/bdd_completed.html"
+		filename = dir+os.sep+"tmp"+os.sep+"bdd_completed.html"
 		baseurl = 'https://www.wuxiaworld.com/tag/completed'
 		if parent is not None: parent.emit(['Database Update, Download Wuxiaworld Finished novel list', 2])
 		else: print('>> Download Wuxiaworld Finished novel list')

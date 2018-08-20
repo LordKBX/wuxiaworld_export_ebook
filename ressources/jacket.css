@@ -21,7 +21,7 @@
 **	the corresponding row is automatically removed from the generated book jacket.
 */
 
-html, body{height:100%;}
+html, body{height:100%;font-family:"맑은 고딕", "Malgun Gothic", sans-serif;}
 
 /*
 **	Banner

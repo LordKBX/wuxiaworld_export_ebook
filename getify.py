@@ -109,7 +109,7 @@ def cover_generator(src, novel, book_name, author):
 		traceback.print_exc()
 		
 	os.remove("./tmp/origin_cover.jpg")
-	os.remove("./tmp/jacket.xhtml")
+	#os.remove("./tmp/jacket.xhtml")
 
 
 """ Saves downloaded xhtml files into the epub format while also

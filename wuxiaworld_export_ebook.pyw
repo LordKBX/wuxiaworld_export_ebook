@@ -7,7 +7,8 @@ from urllib.error import HTTPError, URLError
 import time
 import subprocess
 from PyQt4 import QtCore, QtGui
-import ctypes
+if os.name == 'nt':
+	import ctypes
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + os.sep + 'interfaces')
 import interface
@@ -355,6 +356,8 @@ def preview():
 		return
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
 	book = dialog.bookSelector.currentText()
+	if book not in data_novel['books']: book = 'Book 01'
+	if book not in data_novel['books']: book = 'Book 00'
 	
 	getify.cover_generator(data_novel['cover'], novel, book, data_novel['autor'])
 		
@@ -585,16 +588,82 @@ class MyWindow(QtGui.QMainWindow):
 		if result == QtGui.QMessageBox.Yes:
 			event.accept()
 
+def isUserAdmin():
 
+	if os.name == 'nt':
+		import ctypes
+		# WARNING: requires Windows XP SP2 or higher!
+		try:
+			return ctypes.windll.shell32.IsUserAnAdmin()
+		except:
+			traceback.print_exc()
+			print("Admin check failed, assuming not an admin.")
+			return False
+	elif os.name == 'posix':
+		# Check for root on Posix
+		return os.getuid() == 0
+	else:
+		raise(RuntimeError, "Unsupported operating system for this module: {}".format(os.name))
+
+def runAsAdmin(cmdLine=None, wait=True):
+
+	if os.name != 'nt':
+		raise(RuntimeError, "This function is only implemented on Windows.")
+
+	import win32api, win32con, win32event, win32process
+	from win32com.shell.shell import ShellExecuteEx
+	from win32com.shell import shellcon
+
+	python_exe = sys.executable
+
+	if cmdLine is None:
+		cmdLine = [python_exe] + sys.argv
+	elif type(cmdLine) not in (types.TupleType,types.ListType):
+		raise(ValueError, "cmdLine is not a sequence.")
+	cmd = '"{}"'.format(cmdLine[0])
+	# XXX TODO: isn't there a function or something we can call to massage command line params?
+	params = " ".join(['"{}"'.format(x) for x in cmdLine[1:]])
+	cmdDir = ''
+	showCmd = win32con.SW_SHOWNORMAL
+	#showCmd = win32con.SW_HIDE
+	lpVerb = 'runas'  # causes UAC elevation prompt.
+
+	# print "Running", cmd, params
+
+	# ShellExecute() doesn't seem to allow us to fetch the PID or handle
+	# of the process, so we can't get anything useful from it. Therefore
+	# the more complex ShellExecuteEx() must be used.
+
+	# procHandle = win32api.ShellExecute(0, lpVerb, cmd, params, cmdDir, showCmd)
+
+	procInfo = ShellExecuteEx(nShow=showCmd,
+							  fMask=shellcon.SEE_MASK_NOCLOSEPROCESS,
+							  lpVerb=lpVerb,
+							  lpFile=cmd,
+							  lpParameters=params)
+
+	if wait:
+		procHandle = procInfo['hProcess']	
+		obj = win32event.WaitForSingleObject(procHandle, win32event.INFINITE)
+		rc = win32process.GetExitCodeProcess(procHandle)
+	else:
+		rc = None
+
+	return rc
 
 if __name__ == '__main__':
 	threadpool = QtCore.QThreadPool()
 	myappid = 'wuxiaworld.epubcreator.qt4.2' # arbitrary string
-	if os.name == 'nt': ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+	if os.name == 'nt':
+		ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+		if not isUserAdmin():
+			rc = runAsAdmin()
+			exit(0)
 	app = QtGui.QApplication([])
 	
 	
 	dir = os.path.dirname(os.path.realpath(__file__))
+	os.chdir(dir)
 	app_icon = QtGui.QIcon()
 	app_icon.addFile(dir+'/ressources/icon16x16.png', QtCore.QSize(16,16))
 	app_icon.addFile(dir+'/ressources/icon24x24.png', QtCore.QSize(24,24))
@@ -609,6 +678,7 @@ if __name__ == '__main__':
 	window.show()
 	
 	if 'noupdate' not in sys.argv:
+		if os.path.isdir('./tmp') is False: os.mkdir('./tmp')
 		clean_folder(dir+os.sep+'tmp')
 		check_database()
 		check_script_version()

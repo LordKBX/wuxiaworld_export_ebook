@@ -75,6 +75,10 @@ def init_qtgui(display=None, style=None, qtargs=None):
 	app_icon.addFile(dir+'/ressources/icon48x48.png', QSize(48,48))
 	app_icon.addFile(dir+'/ressources/icon256x256.png', QSize(256,256))
 	app.setWindowIcon(app_icon)
+	
+	font_db = QFontDatabase()
+	font_db.addApplicationFont(dir+'/ressources/malgun.ttf')
+	
 	return app
 
 
