@@ -26,7 +26,7 @@ pip install -r requirements.txt
 ```
 For PyQt4 on windows use the package at this address https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4
 
-####On MacOs
+#### On MacOs
 1. Install ANACONDA => https://www.anaconda.com/download/#macos
 2. Open a terminal
 3. conda install -c anaconda pyqt=4.11.4
@@ -43,15 +43,14 @@ path/where/you/installed/python.exe wuxiaworld_export_ebook.py
 ```
 If you whan to start the script without database update and version check you could add the argument noupdate in your command or use the start_without_update.bat
 
-####On Linux and MacOs
+After that just select the novel you want to read, select the output mode(classic or alternative), the book number(if applicable) and the chapters range, finaly hit the "Generate" Button.
+Keep it mind that it will take some time for the script to finish, so don't close the window or the console if the program doesn't respond.
+
+#### On Linux and MacOs
 ```
 python3 wuxiaworld_export_ebook.py
 ```
 or use the sctipt start.sh
-
-
-After that just select the novel you want to read, select the output mode(classic or alternative), the book number(if applicable) and the chapters range, finaly hit the "Generate" Button.
-Keep it mind that it will take some time for the script to finish, so don't close the window or the console if the program doesn't respond.
 
 ## Keep in mind!
 
