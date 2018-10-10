@@ -25,6 +25,11 @@ To install all dependencies just use the console to navigate into the project fo
 pip install -r requirements.txt
 ```
 For PyQt4 on windows use the package at this address https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4
+####On MacOs
+1. Install ANACONDA => https://www.anaconda.com/download/#macos
+2. Open a terminal
+3. conda install -c anaconda pyqt=4.11.4
+4. start the application with the start.sh(last update) or replace python with python3 in command line
 
 ### Usage
 
