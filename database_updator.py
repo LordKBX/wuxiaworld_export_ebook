@@ -59,6 +59,25 @@ def download(link, file_name):
 	with urllib.request.urlopen(url) as response, open(file_name, 'wb') as out_file:
 		 shutil.copyfileobj(response, out_file)
 		 
+def get_cookie(link):
+	url = urllib.request.Request(
+		link,
+		data=None,
+		headers={
+			   'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+		  }
+		)
+		
+	response = urllib.request.urlopen(url)
+	cookie = ''
+	rep = response.getheader('set-cookie')
+	rep = rep.split('secure, ')
+	for coo in rep:
+		tib = coo.split(';')[0].split('=')
+		if tib[0] == '_csrfToken':
+			cookie = tib[1]
+	return cookie
+
 def insert_wuxiaworld_novel(name, url):
 	global conn, cursor, alt_cover_list, exception_names_list, limited_novel_list
 	dir = os.path.dirname(os.path.realpath(__file__))
@@ -161,7 +180,7 @@ def insert_wuxiaworld_novel(name, url):
 			fileHandle1.close();
 			os.remove(filename_wuxiaworld)
 			
-		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited,translator,synopsis) VALUES(?,?,?,?,?,?,?)", (name, url, autors, img, limit, translator, synopsis))
+		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited,translator,synopsis,source) VALUES(?,?,?,?,?,?,?,?)", (name, url, autors, img, limit, translator, synopsis, 'wuxiaworld.com'))
 		conn.commit()
 
 def start():
@@ -175,7 +194,7 @@ def start():
 		
 	list_novel = []
 	
-	filename = dir+os.sep+"tmp"+os.sep+"bdd_updates.html"
+	filename = dir+os.sep+"tmp"+os.sep+"wuxiaworld_updates.html"
 	baseurl = 'https://www.wuxiaworld.com/updates'
 	if parent is not None: parent.emit(['Database Update, Download Wuxiaworld Ongoing novel list', 1])
 	else: print('>> Download Wuxiaworld Ongoing novel list')
@@ -202,41 +221,59 @@ def start():
 		fileHandle.close()
 		os.remove(filename)
 		
-		filename = dir+os.sep+"tmp"+os.sep+"bdd_completed.html"
-		baseurl = 'https://www.wuxiaworld.com/tag/completed'
-		if parent is not None: parent.emit(['Database Update, Download Wuxiaworld Finished novel list', 2])
-		else: print('>> Download Wuxiaworld Finished novel list')
-		try:
-			download(baseurl, filename)
-		except HTTPError as e:
-			# Return code error (e.g. 404, 501, ...)
-			print('URL: {}, HTTPError: {} - {}'.format(baseurl, e.code, e.reason))
-		except URLError as e:
-			# Not an HTTP-specific error (e.g. connection refused)
-			print('URL: {}, URLError: {}'.format(baseurl, e.reason))
-		else:
-			fileHandle = open(filename, "r", encoding = "utf8")
-			soup = BeautifulSoup(fileHandle, 'html.parser')
-			tab = soup.find(class_="media-list genres-list")
-			novels_dom = tab.find_all(class_="media")
-			for title in novels_dom:
-				name = title.find('h4').string.replace('’', "'").strip()
-				if name not in exclusion_novel_list:
-					url = title.find('a').get('href')
-					list_novel.append({'name': name, 'url': 'https://www.wuxiaworld.com'+url})
-			fileHandle.close()
-			os.remove(filename)
-			
-		pos = 2
-		for novel in list_novel:
-			pos += 1
-			if parent is not None: parent.emit(['Database Update, Processing "{}"'.format(novel['name']), pos])
-			else: print('=> Processing:', novel['name'])
-			insert_wuxiaworld_novel(novel['name'], novel['url'])
-			
-		cursor = None
-		conn.close()
-		print('< Database Update Completed')
+	filename = dir+os.sep+"tmp"+os.sep+"wuxiaworld_completed.html"
+	baseurl = 'https://www.wuxiaworld.com/tag/completed'
+	if parent is not None: parent.emit(['Database Update, Download Wuxiaworld Finished novel list', 1])
+	else: print('>> Download Wuxiaworld Finished novel list')
+	try:
+		download(baseurl, filename)
+	except HTTPError as e:
+		# Return code error (e.g. 404, 501, ...)
+		print('URL: {}, HTTPError: {} - {}'.format(baseurl, e.code, e.reason))
+	except URLError as e:
+		# Not an HTTP-specific error (e.g. connection refused)
+		print('URL: {}, URLError: {}'.format(baseurl, e.reason))
+	else:
+		fileHandle = open(filename, "r", encoding = "utf8")
+		soup = BeautifulSoup(fileHandle, 'html.parser')
+		tab = soup.find(class_="media-list genres-list")
+		novels_dom = tab.find_all(class_="media")
+		for title in novels_dom:
+			name = title.find('h4').string.replace('’', "'").strip()
+			if name not in exclusion_novel_list:
+				url = title.find('a').get('href')
+				list_novel.append({'name': name, 'url': 'https://www.wuxiaworld.com'+url})
+		fileHandle.close()
+		os.remove(filename)
+		
+	baseurl = 'https://www.webnovel.com'
+	cookie = ''
+	if parent is not None: parent.emit(['Database Update, Get webnovel.com cookie', 1])
+	else: print('>> Download Wuxiaworld Finished novel list')
+	try:
+		cookie = get_cookie(baseurl)
+	except HTTPError as e:
+		# Return code error (e.g. 404, 501, ...)
+		print('URL: {}, HTTPError: {} - {}'.format(baseurl, e.code, e.reason))
+	except URLError as e:
+		# Not an HTTP-specific error (e.g. connection refused)
+		print('URL: {}, URLError: {}'.format(baseurl, e.reason))
+	else:
+		print(cookie)
+		#https://www.webnovel.com/apiajax/search/PageAjax?_csrfToken=mC5uuDqyBFhY9KB5j29dzhiNnLUIHmQApnufp398&isExternal=0&pageSize=20&pageIndex=3&keywords=%
+		
+		
+	pos = 1.0
+	step = 99.0 / float(len(list_novel))
+	for novel in list_novel:
+		pos += step
+		if parent is not None: parent.emit(['Database Update, Processing "{}"'.format(novel['name']), int(pos)])
+		else: print('=> Processing:', novel['name'])
+		insert_wuxiaworld_novel(novel['name'], novel['url'])
+		
+	cursor = None
+	conn.close()
+	print('< Database Update Completed')
 
 if __name__ == '__main__':
 	start()

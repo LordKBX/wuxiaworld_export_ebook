@@ -67,7 +67,7 @@ def init_qtgui(display=None, style=None, qtargs=None):
 	myappid = 'wuxiaworld.epubcreator.qt4.2' # arbitrary string
 	if os.name == 'nt': ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 	app = QApplication(qtargs2)
-	dir = os.path.dirname(os.path.realpath(__file__))
+	dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 	app_icon = QIcon()
 	app_icon.addFile(dir+'/ressources/icon16x16.png', QSize(16,16))
 	app_icon.addFile(dir+'/ressources/icon24x24.png', QSize(24,24))

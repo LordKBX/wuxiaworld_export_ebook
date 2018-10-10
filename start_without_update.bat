@@ -1,2 +1,4 @@
 @echo off
-start python wuxiaworld_export_ebook.pyw noupdate &
+setlocal
+cd /d %~dp0
+python wuxiaworld_export_ebook.pyw noupdate

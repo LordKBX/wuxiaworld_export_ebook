@@ -656,9 +656,10 @@ if __name__ == '__main__':
 	myappid = 'wuxiaworld.epubcreator.qt4.2' # arbitrary string
 	if os.name == 'nt':
 		ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-		if not isUserAdmin():
-			rc = runAsAdmin()
-			exit(0)
+		if 'noadm' not in sys.argv:
+			if not isUserAdmin():
+				rc = runAsAdmin()
+				exit(0)
 	app = QtGui.QApplication([])
 	
 	
