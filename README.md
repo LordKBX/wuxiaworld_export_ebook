@@ -39,7 +39,7 @@ python wuxiaworld_export_ebook.py
 ```
 or just use the start.bat file. If you didn't add Python to the PATH variable during the installation or afterwards the write
 ```
-path/where/you/installed/python.exe wuxiaworld_export_ebook.py
+path/where/you/installed/python.exe wuxiaworld_export_ebook.pyw
 ```
 If you whan to start the script without database update and version check you could add the argument noupdate in your command or use the start_without_update.bat
 
@@ -48,7 +48,7 @@ Keep it mind that it will take some time for the script to finish, so don't clos
 
 #### On Linux and MacOs
 ```
-python3 wuxiaworld_export_ebook.py
+python3 wuxiaworld_export_ebook.pyw
 ```
 or use the sctipt start.sh
 
