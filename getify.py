@@ -40,7 +40,10 @@ def clean(file_name_in, file_name_out, start):
 	chapter_title = soup.find(class_="caption clearfix")
 	chapter_title = chapter_title.find("h4")
 	chapter_title = chapter_title.text
-	soup = soup.find(class_="fr-view")
+	soups = soup.find_all(class_="fr-view")
+	for block in soups:
+		if not block.has_attr('id'):
+			soup = block
 	for a in soup.find_all("a"):
 		a.decompose()
 	raw.close()

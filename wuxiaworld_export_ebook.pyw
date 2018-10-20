@@ -177,7 +177,7 @@ def check_script_version_end():
 
 def check_database():
 	global generating
-	if time.time() - float(os.path.getmtime("novels.db")) >= 43200.0: #test 43200 = 12h
+	if time.time() - float(os.path.getmtime("novels.db")) >= 172800.0: #test 43200 = 12h, 172800 = 48h
 		generating = True
 		worker = Worker(check_database_mid) # Any other args, kwargs are passed to the run function
 		worker.signals.finished.connect(check_database_end)
