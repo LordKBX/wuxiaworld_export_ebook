@@ -44,6 +44,7 @@ def clean(file_name_in, file_name_out, start):
 	for block in soups:
 		if not block.has_attr('id'):
 			soup = block
+			break
 	for a in soup.find_all("a"):
 		a.decompose()
 	raw.close()
