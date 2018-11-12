@@ -24,7 +24,10 @@ To install all dependencies just use the console to navigate into the project fo
 ```
 pip install -r requirements.txt
 ```
-For PyQt4 on windows use the package at this address https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4
+
+#### On Windows
+install pywin32 [pour python 3.4]: https://sourceforge.net/projects/pywin32/files/pywin32/Build%20220/pywin32-220.win-amd64-py3.4.exe/download  (last release https://github.com/mhammond/pywin32/releases)
+For PyQt4 use the package at this address https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4
 
 #### On MacOs
 1. Install ANACONDA => https://www.anaconda.com/download/#macos
