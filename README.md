@@ -1,3 +1,4 @@
+
 # wuxiaworld_export_ebook
 This Python script will download chapters from novels availaible on wuxiaworld.com and saves them into the .epub format.
 Based on a Fork of [Wuxiaworld-2-eBook](https://github.com/MakeYourLifeEasier/Wuxiaworld-2-eBook).
@@ -26,7 +27,10 @@ pip install -r requirements.txt
 ```
 
 #### On Windows
-install pywin32 [pour python 3.4]: https://sourceforge.net/projects/pywin32/files/pywin32/Build%20220/pywin32-220.win-amd64-py3.4.exe/download  (last release https://github.com/mhammond/pywin32/releases)
+install pywin32:
+-> [Pour python 3.4](https://sourceforge.net/projects/pywin32/files/pywin32/Build%20220/pywin32-220.win-amd64-py3.4.exe/download)  
+-> [Last release](https://github.com/mhammond/pywin32/releases)
+
 For PyQt4 use the package at this address https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4
 
 #### On MacOs
