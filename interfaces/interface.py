@@ -521,7 +521,7 @@ class Ui_MainWindow(object):
         self.totalExportLabel_3.setText(_translate("MainWindow", "Non", None))
         self.bookLabel.setText(_translate("MainWindow", "Select Book", None))
         self.startingChapterLabel.setText(_translate("MainWindow", "Starting Chapter", None))
-        self.endingChapterLabel.setText(_translate("MainWindow", "Starting Chapter", None))
+        self.endingChapterLabel.setText(_translate("MainWindow", "Ending Chapter", None))
         self.fontLabel.setText(_translate("MainWindow", "Style Text Font", None))
         self.fontLabelPreview_1.setText(_translate("MainWindow", "Preview Regular", None))
         self.fontLabelPreview_2.setText(_translate("MainWindow", "Preview Italic", None))

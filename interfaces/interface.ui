@@ -866,7 +866,7 @@ alternate-background-color: rgb(152, 152, 152);
          <string notr="true">padding-left:5px;background-color:#CCCCCC;color:#000000;</string>
         </property>
         <property name="text">
-         <string>Starting Chapter</string>
+         <string>Ending Chapter</string>
         </property>
        </widget>
       </item>
@@ -1488,7 +1488,7 @@ color: rgb(255, 255, 255);</string>
   </widget>
  </widget>
  <resources>
-  <include location="ressources/r.qrc"/>
+  <include location="../ressources/r.qrc"/>
  </resources>
  <connections/>
 </ui>
