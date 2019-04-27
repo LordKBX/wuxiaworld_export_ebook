@@ -657,9 +657,10 @@ if __name__ == '__main__':
 	if os.name == 'nt':
 		ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 		if 'noadm' not in sys.argv:
-			if not isUserAdmin():
-				rc = runAsAdmin()
-				exit(0)
+			if "Program Files" in os.path.realpath(__file__):
+				if not isUserAdmin():
+					rc = runAsAdmin()
+					exit(0)
 	app = QtGui.QApplication([])
 	
 	
