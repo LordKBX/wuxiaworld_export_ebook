@@ -14,6 +14,14 @@ To run this script you'll need to have Python >=3.4.x installed which you can fi
 - Customizable style whith a style editor/previewer
 - Automatic update of the novel database if database file last modification >= 12h
 
+### Installation
+manually: look for the next section
+
+Windows installer: 
+
+- executable with all dependancies [>>>link<<<](https://mega.nz/#!UdsXnSaQ) 408Mio (noob pack)
+- executable without dependancies [>>>link<<<](https://mega.nz/#!UdsXnSaQ) 14,7Mio
+
 ### Prerequisites
 
 As mentioned before this script was written for Python >=3.4.x.
