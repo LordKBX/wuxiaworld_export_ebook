@@ -19,8 +19,8 @@ manually: look for the next section
 
 Windows installer: 
 
-- executable with all dependancies [>>>link<<<](https://mega.nz/#!UdsXnSaQ) 408Mio (noob pack)
-- executable without dependancies [>>>link<<<](https://mega.nz/#!UdsXnSaQ) 14,7Mio
+- executable with all dependancies [>>>link<<<](https://mega.nz/#!UdsXnSaQ!PX5zt19WT-RByHQFsjgPYQpP4ibcZvP01FjR0Mlh71Q) 408Mio (noob pack)
+- executable without dependancies [>>>link<<<](https://mega.nz/#!QJNklAiT!wNjP7kon49spgie35SGvg03YSMnCYlM_7Bpwbgo3CCc) 14,7Mio
 
 ### Prerequisites
 
