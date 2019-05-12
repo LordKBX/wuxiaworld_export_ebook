@@ -47,6 +47,7 @@ exception_names_list = {#for finding them on novelupdates.com
 		'Stellar Transformations': 'stellar-transformation'
 	}
 
+
 def download(link, file_name):
 	url = urllib.request.Request(
 		link,
@@ -58,7 +59,8 @@ def download(link, file_name):
 
 	with urllib.request.urlopen(url) as response, open(file_name, 'wb') as out_file:
 		 shutil.copyfileobj(response, out_file)
-		 
+
+
 def get_cookie(link):
 	url = urllib.request.Request(
 		link,
@@ -78,9 +80,18 @@ def get_cookie(link):
 			cookie = tib[1]
 	return cookie
 
+
 def insert_wuxiaworld_novel(name, url):
 	global conn, cursor, alt_cover_list, exception_names_list, limited_novel_list
 	dir = os.path.dirname(os.path.realpath(__file__))
+	if os.name == 'nt':
+		dir = os.path.expanduser("~") + os.sep + "wuxiaworld_export_ebook"
+		if os.path.isdir(dir) is False:
+			os.mkdir(dir)
+		if os.path.isdir(dir + os.sep + "tmp") is False:
+			os.mkdir(dir + os.sep + "tmp")
+		if os.path.isdir(dir + os.sep + "export") is False:
+			os.mkdir(dir + os.sep + "export")
 	#name
 	#url
 	autors = ''
@@ -150,32 +161,35 @@ def insert_wuxiaworld_novel(name, url):
 			nov = soup.find(class_='media media-novel-index')
 			if name in alt_cover_list: img = alt_cover_list[name]
 			else: img = nov.find('img').get('src')
-			dom_authors = nov.find_all('p')
-			dom_authors += nov.find_all('dl')
-			for aut in dom_authors:
-				if len(aut.contents) >= 1:
-					strmade = ''
-					for piece in aut.contents:
-						if piece.string is not None:
-							strmade += piece.string
-					if 'Author:' in strmade or 'Translator:' in strmade:
-						clean = strmade.replace('Author:', '').replace('Translator:', '').replace("\n", '').replace("\r", '').replace("\t", '').strip()
-						if clean not in autors:
-							if autors != '': autors += ', '
-							autors += clean
+			dom_authors = None
+			if nov is not None:
+				dom_authors = nov.find_all('p')
+				dom_authors += nov.find_all('dl')
+				for aut in dom_authors:
+					if len(aut.contents) >= 1:
+						strmade = ''
+						for piece in aut.contents:
+							if piece.string is not None:
+								strmade += piece.string
+						if 'Author:' in strmade or 'Translator:' in strmade:
+							clean = strmade.replace('Author:', '').replace('Translator:', '').replace("\n", '').replace(
+								"\r", '').replace("\t", '').strip()
+							if clean not in autors:
+								if autors != '': autors += ', '
+								autors += clean
 							
-			dom_translators = nov.find_all('dl')
-			for aut in dom_translators:
-				if len(aut.contents) >= 1:
-					strmade = ''
-					for piece in aut.contents:
-						if piece.string is not None:
-							strmade += piece.string
-					if 'Translator:' in strmade:
-						clean = strmade.replace('Translator:', '').replace("\n", '').replace("\r", '').replace("\t", '').strip()
-						if clean not in translator and clean not in autors:
-							if translator != '': translator += ', '
-							translator += clean
+				dom_translators = nov.find_all('dl')
+				for aut in dom_translators:
+					if len(aut.contents) >= 1:
+						strmade = ''
+						for piece in aut.contents:
+							if piece.string is not None:
+								strmade += piece.string
+						if 'Translator:' in strmade:
+							clean = strmade.replace('Translator:', '').replace("\n", '').replace("\r", '').replace("\t", '').strip()
+							if clean not in translator and clean not in autors:
+								if translator != '': translator += ', '
+								translator += clean
 			
 			fileHandle1.close();
 			os.remove(filename_wuxiaworld)
@@ -183,9 +197,12 @@ def insert_wuxiaworld_novel(name, url):
 		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited,translator,synopsis,source) VALUES(?,?,?,?,?,?,?,?)", (name, url, autors, img, limit, translator, synopsis, 'wuxiaworld.com'))
 		conn.commit()
 
+
 def start():
 	global conn, cursor, parent
 	dir = os.path.dirname(os.path.realpath(__file__))
+	if os.name == 'nt':
+		dir = os.path.expanduser("~") + os.sep + "wuxiaworld_export_ebook"
 	conn = sql.connect(dir+os.sep+"novels.db")
 	cursor = conn.cursor()
 	

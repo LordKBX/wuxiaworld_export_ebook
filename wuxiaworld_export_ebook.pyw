@@ -1,6 +1,7 @@
 import os
 import os.path
 import sys
+import shutil
 import sqlite3 as sql
 import traceback
 from urllib.error import HTTPError, URLError
@@ -20,6 +21,7 @@ import getify
 conn = None
 cursor = None
 
+storage_dir = ''
 novel = ''
 data_novel = {}
 app = None
@@ -32,8 +34,9 @@ styleUpdateGreen = 'background-color:#55AA00;color: #ffffff;'
 threadpool = None
 outdatedScript = False
 
+
 class WorkerSignals(QtCore.QObject):
-	'''
+	"""
 	Defines the signals available from a running worker thread.
 
 	Supported signals are:
@@ -49,26 +52,25 @@ class WorkerSignals(QtCore.QObject):
 
 	progress
 		`int` indicating % progress
-
-	'''
+	"""
 	finished = QtCore.pyqtSignal()
 	error = QtCore.pyqtSignal(tuple)
 	result = QtCore.pyqtSignal(object)
 	progress = QtCore.pyqtSignal(list)
 
+
 class Worker(QtCore.QRunnable):
-	'''
+	"""
 	Worker thread
 
 	Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
 
-	:param callback: The function callback to run on this worker thread. Supplied args and 
-					 kwargs will be passed through to the runner.
+	:param callback: The function callback to run on this worker thread. Supplied args and kwargs will be passed
+																						through to the runner.
 	:type callback: function
 	:param args: Arguments to pass to the callback function
 	:param kwargs: Keywords to pass to the callback function
-
-	'''
+	"""
 
 	def __init__(self, fn, *args, **kwargs):
 		super(Worker, self).__init__()
@@ -84,9 +86,9 @@ class Worker(QtCore.QRunnable):
 
 	@QtCore.pyqtSlot()
 	def run(self):
-		'''
+		"""
 		Initialise the runner function with passed args, kwargs.
-		'''
+		"""
 
 		# Retrieve args/kwargs here; and fire processing using them
 		try:
@@ -99,7 +101,8 @@ class Worker(QtCore.QRunnable):
 			self.signals.result.emit(result)  # Return the result of the processing
 		finally:
 			self.signals.finished.emit() 
-	
+
+
 def worker_progress(status):
 	updateStatus(status[0])
 	try: print(status[0])
@@ -107,13 +110,16 @@ def worker_progress(status):
 	try: dialog.statusProgressBar.setProperty("value", status[1])
 	except: {}
 
+
 def worker_print_output(s):
 	print(s)
+
 
 def exitWindow():
 	global generating, window
 	window.close()
-	
+
+
 def updateStatus(message:str, green=False):
 	global dialog, styleUpdateGrey, styleUpdateGreen
 	try:
@@ -121,7 +127,8 @@ def updateStatus(message:str, green=False):
 		else: dialog.statusLabel.setStyleSheet(interface._fromUtf8(styleUpdateGrey))
 		dialog.statusLabel.setText(message)
 	except:{}
-	
+
+
 def infoDialog(title, message, modal=True):
 	global app_icon
 	#if modal is True:
@@ -134,6 +141,7 @@ def infoDialog(title, message, modal=True):
 	dialog.label_2.setText(message)
 	dialog.pushButton.clicked.connect(window.close)
 	window.exec_()
+
 
 def check_script_version():
 	global outdatedScript
@@ -148,17 +156,18 @@ def check_script_version():
 def check_script_version_mid(progress_callback):
 	global outdatedScript
 	file_version_online = './check_version.txt'
+	url = 'https://raw.githubusercontent.com/LordKBX/wuxiaworld_export_ebook/master/version.txt'
 	try:
-		getify.download('https://raw.githubusercontent.com/LordKBX/wuxiaworld_export_ebook/master/version.txt', file_version_online)
+		getify.download(url, file_version_online)
 	except HTTPError as e:
 		# Return code error (e.g. 404, 501, ...)
-		print('URL: {}, HTTPError: {} - {}'.format(bulk_list[x]['url'], e.code, e.reason))
+		print('URL: {}, HTTPError: {} - {}'.format(url, e.code, e.reason))
 	except URLError as e:
 		# Not an HTTP-specific error (e.g. connection refused)
-		print('URL: {}, URLError: {}'.format(bulk_list[x]['url'], e.reason))
+		print('URL: {}, URLError: {}'.format(url, e.reason))
 	else:
-		file1  = open("./version.txt", "r")
-		file2  = open(file_version_online, "r")
+		file1 = open("./version.txt", "r")
+		file2 = open(file_version_online, "r")
 		version_locale = file1.read()
 		version_online = file2.read()
 		file1.close()
@@ -169,15 +178,23 @@ def check_script_version_mid(progress_callback):
 		if version_locale.strip() not in version_online.strip():
 			outdatedScript = True
 
+
 def check_script_version_end():
 	global outdatedScript
 	if outdatedScript is True:
-		infoDialog('Update', '<html><head/><body><p>A new version of the script is online</p><p><a href="https://github.com/LordKBX/wuxiaworld_export_ebook"><span style=" text-decoration: underline; color:#0000ff;">https://github.com/LordKBX/wuxiaworld_export_ebook</span></a></p></body></html>')
+		infoDialog('Update', '<html><head/><body>\
+			<p>A new version of the script is online</p>\
+			<p><a href="https://github.com/LordKBX/wuxiaworld_export_ebook">\
+				<span style=" text-decoration: underline; color:#0000ff;">https://github.com/LordKBX/wuxiaworld_export_ebook</span>\
+				</a>\
+			</p></body></html>'
+			)
 	else: print('< Script up to date')
+
 
 def check_database():
 	global generating
-	if time.time() - float(os.path.getmtime("novels.db")) >= 172800.0: #test 43200 = 12h, 172800 = 48h
+	if time.time() - float(os.path.getmtime(storage_dir + os.sep + "novels.db")) >= 172800.0: #test 43200 = 12h, 172800 = 48h
 		generating = True
 		worker = Worker(check_database_mid) # Any other args, kwargs are passed to the run function
 		worker.signals.finished.connect(check_database_end)
@@ -185,24 +202,27 @@ def check_database():
 		threadpool.start(worker)
 		infoDialog('Info', 'Start database update', False)
 	else: check_database_final()
-		
+
+
 def check_database_mid(progress_callback):
 	print('> Updating Novel Database')
 	database_updator.parent = progress_callback
 	database_updator.start()
 
+
 def check_database_end():
-	os.utime("novels.db")
+	os.utime(storage_dir + os.sep + "novels.db")
 	status = "Database Update, Task finished at {}".format(time.asctime())
 	updateStatus(status, True)
 	print(status)
 	dialog.statusProgressBar.setProperty("value", 100)
 	check_database_final()
 
+
 def check_database_final():
 	global conn, cursor, generating
 	generating = False
-	conn = sql.connect("novels.db")
+	conn = sql.connect(storage_dir + os.sep + "novels.db")
 	cursor = conn.cursor()
 	cursor.execute("SELECT NovelName FROM 'Information' ORDER BY NovelName ASC")
 	db = cursor.fetchall()
@@ -212,6 +232,7 @@ def check_database_final():
 		namelist.sort()
 	dialog.novelSelector.clear()
 	dialog.novelSelector.addItems(namelist)
+
 
 def changeFont():
 	global dialog
@@ -243,6 +264,7 @@ def changeFont():
 	except: 
 		traceback.print_exc()
 
+
 def lockInterface(full=False):
 	global dialog
 	if full is True:
@@ -253,13 +275,15 @@ def lockInterface(full=False):
 	dialog.startingChapterSelector.setEnabled(False)
 	dialog.endingChapterSelector.setEnabled(False)
 	dialog.fontSelector.setEnabled(False)
-	
+
+
 def unlockInterface():
 	global dialog
 	dialog.novelSelector.setEnabled(True)
 	dialog.modeSlider.setEnabled(True)
 	dialog.totalExportSlider.setEnabled(True)
 	dialog.fontSelector.setEnabled(True)
+
 
 def changeNovel():
 	global novel, cursor, data_novel
@@ -281,14 +305,16 @@ def changeNovel():
 			#"Because they sell ebooks of their originals novel(on Amazon), you would be limited to the first 45 chapters in classic mode or the first book in alternate mode", QtGui.QMessageBox.Ok)
 		
 		QtCore.QTimer.singleShot(200, changeNovelPart2)
-		
+
+
 def changeNovelPart2():
 	global novel, data_novel
 	data_novel['books'], data_novel['alt_books'] = novel_data.import_data(data_novel['link'], novel, data_novel['limited'])
 	unlockInterface()
 	export_mode_change()
 	updateStatus( "Data for novel '{}' loaded at {}".format( novel, time.asctime() ) )
-	
+
+
 def export_mode_change():
 	global dialog, novel, cursor, data_novel
 	export_mode = dialog.modeSlider.value()
@@ -323,7 +349,8 @@ def export_mode_change():
 		dialog.endingChapterSelector.clear()
 		dialog.endingChapterSelector.addItems([])
 		dialog.endingChapterSelector.setEnabled(False)
-		
+
+
 def book_change():
 	global dialog, novel, cursor, data_novel
 	export_mode = dialog.modeSlider.value()
@@ -348,6 +375,7 @@ def book_change():
 	dialog.endingChapterSelector.setEnabled(True)
 	dialog.endingChapterSelector.setCurrentIndex(len(chapters) - 1)
 
+
 def preview():
 	global dialog, app, novel, cursor, data_novel, generating
 	if generating is True: return
@@ -361,10 +389,10 @@ def preview():
 	
 	getify.cover_generator(data_novel['cover'], novel, book, data_novel['autor'])
 		
-	file2  = open("./ressources/common.css", "r")
+	file2 = open("./ressources/common.css", "r")
 	css = file2.read()
 	file2.close()
-	file3  = open("./tmp/common.css", "w")
+	file3 = open("./tmp/common.css", "w")
 	file3.write(css.replace('<FONT>', dialog.fontSelector.currentText()))
 	file3.close()
 	
@@ -392,7 +420,8 @@ def preview():
 		file3.close()
 		command1 = subprocess.Popen([sys.executable, "./css_editor/launch.py"])
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-	
+
+
 def generate():
 	global dialog, novel, data_novel, generating, threadpool
 	if generating is True: return
@@ -411,7 +440,8 @@ def generate():
 
 	# Execute
 	threadpool.start(worker)
-	
+
+
 def generate_mid(progress_callback):
 	global dialog, novel, data_novel
 	export_mode = dialog.modeSlider.value()
@@ -420,8 +450,8 @@ def generate_mid(progress_callback):
 	chapter_start = dialog.startingChapterSelector.currentText()
 	chapter_end = dialog.endingChapterSelector.currentText()
 	
-	#title = novel
-	#data_novel['books'], data_novel['alt_books']
+	# title = novel
+	# data_novel['books'], data_novel['alt_books']
 	msg1 = ''
 	msg2 = ''
 	msg3 = ''
@@ -439,7 +469,7 @@ def generate_mid(progress_callback):
 					good = True
 					bulk_list.append(bok)
 					if bok['name'] == chapter_end: good = False
-		else:#Mode Alternatif
+		else:  # Mode Alternatif
 			msg1 = book
 			for block in data_novel['alt_books']:
 				good = False
@@ -466,8 +496,8 @@ def generate_mid(progress_callback):
 			pos += step
 			progress_callback.emit(['Downloading {}'.format(bulk_list[x]['name']), pos])
 			ti = bulk_list[x]['url'].split('/')
-			filename = "./tmp/"+ti[len(ti) - 1] + ".xhtml"
-			filenameOut = "./tmp/"+'ch-{}'.format(x+1)
+			filename = storage_dir + os.sep + "tmp/"+ti[len(ti) - 1] + ".xhtml"
+			filenameOut = storage_dir + os.sep + "tmp/"+'ch-{}'.format(x+1)
 			try:
 				getify.download('https://www.wuxiaworld.com' + bulk_list[x]['url'], filename)
 			except HTTPError as e:
@@ -501,8 +531,8 @@ def generate_mid(progress_callback):
 				for x in range(len(bulk_list)):
 					progress_callback.emit(['generating {} => {}'.format(tome, bulk_list[x]['name']), pos])
 					ti = bulk_list[x]['url'].split('/')
-					filename = "./tmp/"+ti[len(ti) - 1] + ".xhtml"
-					filenameOut = "./tmp/"+'ch-{}'.format(x+1)
+					filename = storage_dir + os.sep + "tmp/"+ti[len(ti) - 1] + ".xhtml"
+					filenameOut = storage_dir + os.sep + "tmp/"+'ch-{}'.format(x+1)
 					try:
 						getify.download('https://www.wuxiaworld.com' + bulk_list[x]['url'], filename)
 					except HTTPError as e:
@@ -516,7 +546,7 @@ def generate_mid(progress_callback):
 						file_list.append(filenameOut + ".xhtml")
 				progress_callback.emit(['generating {} => {}'.format(tome, getify.generate_name(novel, data_novel['autor'], 'ch-', tome, None, None)), pos])
 				getify.generate(file_list, novel, data_novel['autor'], 'ch-', tome, None, None)
-		else:#Mode Alternatif
+		else:  # Mode Alternatif
 			step = 90 / len(data_novel['alt_books'])
 			pos = 5
 			for block in data_novel['alt_books']:
@@ -531,8 +561,8 @@ def generate_mid(progress_callback):
 				for x in range(len(bulk_list)):
 					progress_callback.emit(['generating {} => {}'.format(block['title'], bulk_list[x]['name']), pos])
 					ti = bulk_list[x]['url'].split('/')
-					filename = "./tmp/"+ti[len(ti) - 1] + ".xhtml"
-					filenameOut = "./tmp/"+'ch-{}'.format(x+1)
+					filename = storage_dir + os.sep + "tmp/"+ti[len(ti) - 1] + ".xhtml"
+					filenameOut = storage_dir + os.sep + "tmp/"+'ch-{}'.format(x+1)
 					try:
 						getify.download('https://www.wuxiaworld.com' + bulk_list[x]['url'], filename)
 					except HTTPError as e:
@@ -546,7 +576,8 @@ def generate_mid(progress_callback):
 						file_list.append(filenameOut + ".xhtml")
 				progress_callback.emit(['generating {} => {}'.format(block['title'], getify.generate_name(novel, data_novel['autor'], 'ch-', block['title'], None, None)), pos])
 				getify.generate(file_list, novel, data_novel['autor'], 'ch-', block['title'], None, None)
-	
+
+
 def generate_end():
 	global dialog, app, novel, cursor, data_novel, generating
 	status = "Task finished at {}".format(time.asctime())
@@ -568,6 +599,7 @@ def generate_end():
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
 	subprocess.Popen('explorer "' + os.path.dirname(os.path.realpath(__file__)) + os.sep + 'export' + '"')
 
+
 def clean_folder(folder):
 	for the_file in os.listdir(folder):
 		file_path = os.path.join(folder, the_file)
@@ -578,6 +610,7 @@ def clean_folder(folder):
 		except Exception as e:
 			print(e)
 
+
 class MyWindow(QtGui.QMainWindow):
 	def closeEvent(self,event):
 		global generating
@@ -587,6 +620,7 @@ class MyWindow(QtGui.QMainWindow):
 		
 		if result == QtGui.QMessageBox.Yes:
 			event.accept()
+
 
 def isUserAdmin():
 
@@ -604,6 +638,7 @@ def isUserAdmin():
 		return os.getuid() == 0
 	else:
 		raise(RuntimeError, "Unsupported operating system for this module: {}".format(os.name))
+
 
 def runAsAdmin(cmdLine=None, wait=True):
 
@@ -651,10 +686,44 @@ def runAsAdmin(cmdLine=None, wait=True):
 
 	return rc
 
+
 if __name__ == '__main__':
 	threadpool = QtCore.QThreadPool()
 	myappid = 'wuxiaworld.epubcreator.qt4.2' # arbitrary string
+	storage_dir = os.path.realpath(__file__)
 	if os.name == 'nt':
+		storage_dir = os.path.expanduser("~") + os.sep + "wuxiaworld_export_ebook"
+	print(storage_dir)
+	if os.path.isdir(storage_dir) is False:
+		os.mkdir(storage_dir)
+	if os.path.isdir(storage_dir + os.sep + "tmp") is False:
+		os.mkdir(storage_dir + os.sep + "tmp")
+	if os.path.isdir(storage_dir + os.sep + "export") is False:
+		os.mkdir(storage_dir + os.sep + "export")
+	if os.path.isdir(storage_dir + os.sep + "ressources") is False:
+		os.mkdir(storage_dir + os.sep + "ressources")
+
+	if os.name == 'nt':
+		if os.path.isfile(storage_dir + os.sep + "ressources" + os.sep + "common.css") is False:
+			shutil.copy2(
+				os.path.dirname(os.path.realpath(__file__)) + os.sep + "ressources" + os.sep + "common.css",
+				storage_dir + os.sep + "ressources" + os.sep + "common.css"
+			)
+		if os.path.isdir(storage_dir + os.sep + "ressources" + os.sep + "themes") is False:
+			os.mkdir(storage_dir + os.sep + "ressources" + os.sep + "themes")
+			o = os.path.dirname(os.path.realpath(__file__)) + os.sep + "ressources" + os.sep + "themes"
+			d = storage_dir + os.sep + "ressources" + os.sep + "themes"
+			for item in os.listdir(o):
+				shutil.copy2(o + os.sep + item, d + os.sep + item)
+		if os.path.isfile(storage_dir + os.sep + "novels.db") is False:
+			tconn = sql.connect(storage_dir + os.sep + "novels.db")
+			tcursor = tconn.cursor()
+			tcursor.execute("CREATE TABLE Information(NovelName TEXT, link TEXT, autor TEXT, cover TEXT, \
+				limited INTEGER DEFAULT 0, translator TEXT, synopsis TEXT, source TEXT)")
+			tconn.commit()
+			tconn.close()
+			os.utime(storage_dir + os.sep + "novels.db", (0, 0))
+		print(storage_dir)
 		ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 		if 'noadm' not in sys.argv:
 			if "Program Files" in os.path.realpath(__file__):
@@ -662,7 +731,6 @@ if __name__ == '__main__':
 					rc = runAsAdmin()
 					exit(0)
 	app = QtGui.QApplication([])
-	
 	
 	dir = os.path.dirname(os.path.realpath(__file__))
 	os.chdir(dir)
@@ -697,20 +765,19 @@ if __name__ == '__main__':
 	fontmax = 0
 	curFont = ''
 	try:
-		file1  = open("./ressources/loading_fonts.txt", "r")
+		file1 = open(dir+"/ressources/loading_fonts.txt", "r")
 		curFont = file1.read()
 		file1.close()
-		for x in os.listdir('./ressources/fonts'):
-			if os.path.isdir('./ressources/fonts/'+x): 
+		for x in os.listdir(dir+'/ressources/fonts'):
+			if os.path.isdir(dir+'/ressources/fonts/'+x):
 				fontsList.append(x)
 				if x == curFont:
 					fontindex = fontmax
 				fontmax += 1
-	except: 
+	except Exception as err:
 		traceback.print_exc()
-		
-	
-	#set values
+
+	# set values
 	updateStatus('')
 	
 	dialog.fontSelector.clear()
@@ -718,7 +785,7 @@ if __name__ == '__main__':
 	dialog.fontSelector.setCurrentIndex(fontindex)
 	changeFont()
 	
-	#set signals/slots
+	# set signals/slots
 	dialog.exitButton.clicked.connect(exitWindow)
 	dialog.novelSelector.currentIndexChanged.connect(changeNovel)
 	dialog.fontSelector.currentIndexChanged.connect(changeFont)

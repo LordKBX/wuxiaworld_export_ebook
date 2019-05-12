@@ -27,19 +27,22 @@ checkFontTimer = None
 checkFontLastTime = 0
 current_style_font = ''
 
+
 def updateFont():
 	global dialog, urlBase_clean, checkFontLastTime, current_style_font
 	newTime = float(os.path.getmtime(urlBase_clean+"/ressources/loading_fonts.txt"))
 	if checkFontLastTime < newTime:
 		checkFontLastTime = newTime
-		file1  = open(urlBase_clean+"/ressources/loading_fonts.txt", "r")
+		file1 = open(urlBase_clean+"/ressources/loading_fonts.txt", "r")
 		current_style_font = file1.read()
 		file1.close()
 		clickPreview()
 
+
 def redoTextHighlight():
 	global dialog, highlight
 	highlight.rehighlight()
+
 
 def changePage():
 	global dialog, urlBase, urlBase_clean
@@ -52,33 +55,36 @@ def changePage():
 		print('changePage')
 		if check_is_toc is True:
 			dialog.webView.setUrl(QtCore.QUrl(_fromUtf8(urlBase_clean+"/tmp/toc.xhtml")))
-			file2  = open(urlBase_clean+"/tmp/toc.xhtml", "rb")
+			file2 = open(urlBase_clean+"/tmp/toc.xhtml", "rb")
 			
 		else:
 			dialog.webView.setUrl(QtCore.QUrl(_fromUtf8(urlBase_clean+"/tmp/ch-1.xhtml")))
-			file2  = open(urlBase_clean+"/tmp/ch-1.xhtml", "rb")
+			file2 = open(urlBase_clean+"/tmp/ch-1.xhtml", "rb")
 		soup = BeautifulSoup(file2, 'html.parser')
 		dialog.plainTextEdit.setPlainText(soup.prettify())
 		file2.close()
-			
+
+
 def clickPreview():
 	global dialog, urlBase_clean, current_style_font
 	text = dialog.textEdit.document().toPlainText()
-	file3  = open(urlBase_clean+"/tmp/common.css", "w")
+	file3 = open(urlBase_clean+"/tmp/common.css", "w")
 	file3.write(text.replace('<FONT>', current_style_font))
 	file3.close()
 	dialog.webView.reload()
-			
+
+
 def clickSave():
 	global dialog, urlBase_clean
 	text = dialog.textEdit.document().toPlainText()
 	#print(text)
 	print('Sauvegarde css')
-	file3  = open(urlBase_clean+"/ressources/common.css", "w")
+	file3 = open(urlBase_clean+"/ressources/common.css", "w")
 	file3.write(text)
 	file3.close()
 	dialog.webView.reload()
-	
+
+
 def load_preset():
 	global urlBase_clean, dialog2, window2
 	dialog2 = presetUI.Ui_Dialog()
@@ -99,10 +105,11 @@ def load_preset():
 	dialog2.comboBox.addItems(themes)
 	dialog2.comboBox.setCurrentIndex(pos)
 	
-	dialog2.pushButton.clicked.connect(load_preset2)#signal
+	dialog2.pushButton.clicked.connect(load_preset2)  # signal
 	
 	window2.exec_()
-	
+
+
 def load_preset2():
 	global dialog, dialog2, window2
 	style = dialog2.comboBox.currentText()
@@ -118,17 +125,20 @@ def load_preset2():
 	window2 = None
 	clickPreview()
 
+
 class MyWindow(QtGui.QDialog):
-	def closeEvent(self,event):
+	def closeEvent(self, event):
 		event.ignore()
 		result = QtGui.QMessageBox.question(self, "Confirm Exit...", "Are you sure you want to exit ?", QtGui.QMessageBox.Yes| QtGui.QMessageBox.No)
 		
 		if result == QtGui.QMessageBox.Yes:
 			event.accept()
 
+
 if __name__ == '__main__':
-	myappid = 'wuxiaworld.epubcreator.qt4.2' # arbitrary string
-	if os.name == 'nt': ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+	myappid = 'wuxiaworld.epubcreator.qt4.2'  # arbitrary string
+	if os.name == 'nt':
+		ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 	app = QtGui.QApplication([])
 	dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 	app_icon = QtGui.QIcon()
@@ -143,14 +153,14 @@ if __name__ == '__main__':
 	dialog.setupUi(window)
 	window.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
 	
-	dialog.radioButton_contentTable.clicked.connect(changePage)#signal
-	dialog.radioButton_chapter1.clicked.connect(changePage)#signal
-	dialog.pushButtonPreview.clicked.connect(clickPreview)#signal
-	dialog.pushButtonSave.clicked.connect(clickSave)#signal
-	dialog.presetButton.clicked.connect(load_preset)#signal
+	dialog.radioButton_contentTable.clicked.connect(changePage)  # signal
+	dialog.radioButton_chapter1.clicked.connect(changePage)  # signal
+	dialog.pushButtonPreview.clicked.connect(clickPreview)  # signal
+	dialog.pushButtonSave.clicked.connect(clickSave)  # signal
+	dialog.presetButton.clicked.connect(load_preset)  # signal
 	
-	file1  = open(urlBase_clean+"/ressources/loading_fonts.txt", "r")
-	file2  = open(urlBase_clean+"/ressources/common.css", "r")
+	file1 = open(urlBase_clean+"/ressources/loading_fonts.txt", "r")
+	file2 = open(urlBase_clean+"/ressources/common.css", "r")
 	current_style_font = file1.read()
 	css = file2.read()
 	file1.close()

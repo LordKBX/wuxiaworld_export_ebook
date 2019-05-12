@@ -21,7 +21,7 @@
 #
 # Nice ideas "todo":
 #  - Add QTcpSocket support to create a "screenshot daemon" that
-#	can handle multiple requests at the same time.
+# can handle multiple requests at the same time.
 
 import time
 import os
@@ -31,9 +31,10 @@ from PyQt4.QtGui import *
 from PyQt4.QtWebKit import *
 from PyQt4.QtNetwork import *
 
-# Class for Website-Rendering. Uses QWebPage, which
-# requires a running QtGui to work.
+
 class WebkitRenderer(QObject):
+	# Class for Website-Rendering. Uses QWebPage, which
+	# requires a running QtGui to work.
 	"""
 	A class that helps to create 'screenshots' of webpages using
 	Qt's QWebkit. Requires PyQt4 library.
@@ -42,7 +43,7 @@ class WebkitRenderer(QObject):
 	resulting image as 'str' object or render_to_file() to write the image
 	directly into a 'file' resource.
 	"""
-	def __init__(self,**kwargs):
+	def __init__(self, **kwargs):
 		"""
 		Sets default values for the properties.
 		"""
@@ -82,7 +83,6 @@ class WebkitRenderer(QObject):
 			QWebSettings.JavascriptCanOpenWindows : False
 		}
 
-
 	def render(self, res):
 		"""
 		Renders the given URL into a QImage object
@@ -121,8 +121,8 @@ class WebkitRenderer(QObject):
 		image.save(qBuffer, format)
 		return qBuffer.buffer().data()
 
-## @brief The CookieJar class inherits QNetworkCookieJar to make a couple of functions public.
-class CookieJar(QNetworkCookieJar):
+
+class CookieJar(QNetworkCookieJar):  # @brief The CookieJar inherits QNetworkCookieJar to make a few functions public.
 	def __init__(self, cookies, qtUrl, parent=None):
 		QNetworkCookieJar.__init__(self, parent)
 		for cookie in cookies:
@@ -133,6 +133,7 @@ class CookieJar(QNetworkCookieJar):
 	
 	def setAllCookies(self, cookieList):
 		QNetworkCookieJar.setAllCookies(self, cookieList)
+
 
 class _WebkitRendererHelper(QObject):
 	"""
@@ -171,9 +172,11 @@ class _WebkitRendererHelper(QObject):
 			)
 
 		# Create and connect required PyQt4 objects
-		self._page = CustomWebPage(logger=self.logger, ignore_alert=self.ignoreAlert,
+		self._page = CustomWebPage(
+			logger=self.logger, ignore_alert=self.ignoreAlert,
 			ignore_confirm=self.ignoreConfirm, ignore_prompt=self.ignorePrompt,
-			interrupt_js=self.interruptJavaScript)
+			interrupt_js=self.interruptJavaScript
+		)
 		self._page.networkAccessManager().setProxy(proxy)
 		self._view = QWebView()
 		self._view.setPage(self._page)
@@ -332,33 +335,28 @@ class _WebkitRendererHelper(QObject):
 		return qImage
 
 	def _on_each_reply(self,reply):
-	  """
-	  Logs each requested uri
-	  """
-	  self.logger.debug("Received %s" % (reply.url().toString()))
+		""" Logs each requested uri """
+		self.logger.debug("Received %s" % (reply.url().toString()))
 
-	# Eventhandler for "loadStarted()" signal
 	def _on_load_started(self):
-		"""
-		Slot that sets the '__loading' property to true
-		"""
+		# Eventhandler for "loadStarted()" signal
+		""" Slot that sets the '__loading' property to true """
 		if self.logger: self.logger.debug("loading started")
 		self.__loading = True
 
-	# Eventhandler for "loadFinished(bool)" signal
 	def _on_load_finished(self, result):
-		"""Slot that sets the '__loading' property to false and stores
+		# Eventhandler for "loadFinished(bool)" signal
+		"""
+		Slot that sets the '__loading' property to false and stores
 		the result code in '__loading_result'.
 		"""
 		if self.logger: self.logger.debug("loading finished with result %s", result)
 		self.__loading = False
 		self.__loading_result = result
 
-	# Eventhandler for "sslErrors(QNetworkReply *,const QList<QSslError>&)" signal
 	def _on_ssl_errors(self, reply, errors):
-		"""
-		Slot that writes SSL warnings into the log but ignores them.
-		"""
+		# Eventhandler for "sslErrors(QNetworkReply *,const QList<QSslError>&)" signal
+		""" Slot that writes SSL warnings into the log but ignores them. """
 		for e in errors:
 			if self.logger: self.logger.warn("SSL: " + e.errorString())
 		reply.ignoreSslErrors()

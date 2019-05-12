@@ -6,6 +6,7 @@ import sys
 import copy
 from bs4 import BeautifulSoup
 
+
 def import_data(link: str, novel: str, limited: int):
 	#link = 'https://www.wuxiaworld.com/novel/child-of-light'
 	print(link)
@@ -22,7 +23,7 @@ def import_data(link: str, novel: str, limited: int):
 	with urllib.request.urlopen(url) as response, open(file_name, 'wb') as out_file:
 		shutil.copyfileobj(response, out_file)
 
-	f = open(file_name, "r", encoding = "utf8")
+	f = open(file_name, "r", encoding="utf8")
 	soup = BeautifulSoup(f, 'html.parser')
 	with_volume = False
 
