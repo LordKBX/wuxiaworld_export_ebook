@@ -24,10 +24,10 @@ exclusion_novel_list = [
 	# 'Condemning the Heavens',
 	# 'Blue Phoenix'
 ]
-limited_novel_list = [
+limited_novel_list = ['The Divine Elements']
+expeled_novel_list = [
 	'Condemning the Heavens',
 	'Blue Phoenix',
-	'The Divine Elements',
 	'Legends of Ogre Gate',
 	'Overthrowing Fate'
 ]
@@ -97,6 +97,7 @@ def insert_wuxiaworld_novel(name, url):
 	autors = ''
 	img = ''
 	limit = 0
+	if name in expeled_novel_list: return
 	if name in limited_novel_list: limit = 1
 	translator = ''
 	synopsis = ''

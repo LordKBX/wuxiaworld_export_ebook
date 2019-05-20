@@ -50,7 +50,7 @@ For PyQt4 use the package at this address https://www.lfd.uci.edu/~gohlke/python
 
 Download the script and navigate to the folder using the console then write
 ```
-python wuxiaworld_export_ebook.py
+python wuxiaworld_export_ebook.pyw
 ```
 or just use the start.bat file. If you didn't add Python to the PATH variable during the installation or afterwards the write
 ```
