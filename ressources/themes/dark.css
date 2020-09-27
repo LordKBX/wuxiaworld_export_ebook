@@ -9,6 +9,7 @@
 @font-face { font-family: "<FONT>"; src: url(Bold.ttf); font-weight: bold; }
 
 *{font-family:"<FONT>", sans-serif;background:#444444;color:#ffffff;}
+body, html{height:100%;background:#444444;}
 h1{text-align:center;}
 h2{text-align:center;}
 h3{text-align:center;}
@@ -22,7 +23,7 @@ img{max-width:100%;height:auto;display:block;margin:0 auto;}
 
 /*Content Page List only*/
 ol{background:#7F3300;padding-top:15px;padding-bottom:15px;}
-ol *{background:#7F3300;color:#ffffff;}
+ol *{background:#7F3300;color:#ffffff !important;}
 ol li{padding:5px;width:calc(100% - 20px);}
 ol li a{}
 

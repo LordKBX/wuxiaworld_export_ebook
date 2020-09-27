@@ -347,6 +347,8 @@ def preview():
 	if novel == '':
 		infoDialog('Information', "Function availlable only if a novel was selected")
 		return
+	if os.path.isdir(storage_dir + os.sep + "tmp" + os.sep + "images") is False:
+		os.mkdir(storage_dir + os.sep + "tmp" + os.sep + "images")
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
 	book = dialog.bookSelector.currentText()
 	if book not in data_novel['books']: book = 'Book 01'
@@ -392,6 +394,8 @@ def generate():
 	if novel == '': return
 	lockInterface(True)
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
+	if os.path.isdir(storage_dir + os.sep + "tmp" + os.sep + "images") is False:
+		os.mkdir(storage_dir + os.sep + "tmp" + os.sep + "images")
 	status = "Start ebook generation at {}".format( novel, time.asctime() )
 	updateStatus(status)
 	print(status)

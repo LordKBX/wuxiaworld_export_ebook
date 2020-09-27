@@ -11,6 +11,7 @@ import base64
 from bs4 import BeautifulSoup
 import uuid
 import html
+import traceback
 
 def find_between(file):
 	f = open(file, "r", encoding = "utf8")
@@ -49,14 +50,15 @@ def clean(file_name_in, file_name_out, start):
 				imgext = tb[len(tb) - 1]
 				imgname = file_name_out + '_im{}'.format(cpt)+'.'+imgext
 				tb = imgname.split('/')
-				imgname2 = tb[len(tb) - 1]
+				imgname2 = imgname.replace(tb[len(tb) - 1], 'images/'+tb[len(tb) - 1])
 				print(img['src'])
 				try:
-					download(img['src'], imgname)
-					img['src'] = 'images/'+imgname2
-					suplementList.append(imgname2)
+					
+					download(img['src'], imgname2)
+					img['src'] = 'images/'+tb[len(tb) - 1]
+					suplementList.append('images/'+tb[len(tb) - 1])
 				except:
-					{}
+					traceback.print_exc()
 				cpt += 1
 			soup = block
 			break
@@ -71,8 +73,10 @@ def clean(file_name_in, file_name_out, start):
 	file.write("\n"+'<link href="common.css" rel="stylesheet" type="text/css"/>')
 	file.write("\n</head>")
 	file.write("\n<body>")
+	file.write("\n<section>")
 	file.write("\n<h1>" + chapter_title + "</h1>")
 	file.write(str(soup).replace('<p></p>', '').replace('<p><br></p>', '').replace('<hr>', ''))
+	file.write("\n</section>")
 	file.write("\n</body>")
 	file.write("\n</html>")
 	os.remove(file_name_in)
@@ -249,7 +253,7 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	try: os.remove(storage_dir + os.sep + "tmp/cover.png")
 	except: {}
 	
-	file2 = open("./ressources/common.css", "r")
+	file2 = open(storage_dir + os.sep + "ressources/common.css", "r")
 	file3 = open(storage_dir + os.sep + "tmp/common.css", "w")
 	ccss = file2.read()
 	file2.close()
@@ -259,13 +263,13 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	
 	epub.write(storage_dir + os.sep + "tmp/common.css", "OEBPS/common.css")
 	for img in suplementList:
-		epub.write(storage_dir + os.sep + "tmp/"+img, "OEBPS/images/"+img)
+		epub.write(storage_dir + os.sep + "tmp/"+img, "OEBPS/"+img)
 	try: os.remove(storage_dir + os.sep + "tmp/common.css")
 	except: {}
-	epub.write("./ressources/fonts/"+font+"/Regular.ttf", "OEBPS/Regular.ttf")
-	epub.write("./ressources/fonts/"+font+"/Bold.ttf", "OEBPS/Bold.ttf")
-	epub.write("./ressources/fonts/"+font+"/Bold-Italic.ttf", "OEBPS/Bold-Italic.ttf")
-	epub.write("./ressources/fonts/"+font+"/Italic.ttf", "OEBPS/Italic.ttf")
+	epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Regular.ttf", "OEBPS/Regular.ttf")
+	epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Bold.ttf", "OEBPS/Bold.ttf")
+	epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Bold-Italic.ttf", "OEBPS/Bold-Italic.ttf")
+	epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Italic.ttf", "OEBPS/Italic.ttf")
 	
 	epub.close()
 	# removes all the temporary files
