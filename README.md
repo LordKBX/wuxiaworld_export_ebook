@@ -5,7 +5,7 @@ Based on a Fork of [Wuxiaworld-2-eBook](https://github.com/MakeYourLifeEasier/Wu
 
 ## Getting Started
 
-To run this script you'll need to have Python >=3.4.x installed which you can find [here](https://www.python.org/downloads/ "Python Download Link").
+To run this script you'll need to have Python >=3.5.x installed which you can find [here](https://www.python.org/downloads/ "Python Download Link").
 
 ### Features
 
@@ -17,35 +17,23 @@ To run this script you'll need to have Python >=3.4.x installed which you can fi
 ### Installation
 manually: look for the next section
 
-Windows installer: 
+Windows installer:  [>>>link<<<](https://github.com/LordKBX/wuxiaworld_export_ebook/releases)
 
-- executable with all dependancies [>>>link<<<](https://mega.nz/#!Nd0mnILB!_CQc11KnupSJSjtesZF0edgbPQqyBxBPNMRbcc4vN5g) 408Mio (noob pack)
-- executable without dependancies [>>>link<<<](https://mega.nz/#!wAswUA7Y!AxRwknbOS3jgY1vPeaeRf5OtGd8BymotgrQCa1YVlV0) 14,7Mio
-- Folder with all versions [>>>link<<<](https://mega.nz/#F!4QlEWAgT!3zTS9aildNOev6nY5KpFFg)
+- executable with all dependancies (full version) (noob pack)
+- executable without dependancies (light version)
 
 ### Prerequisites
 
-As mentioned before this script was written for Python >=3.4.x.
+As mentioned before this script was written for Python >=3.5.x.
 
-Additionally the packages PyQt4, lxml and Beautifulsoup4 are required.
+Additionally the packages PyQt5, PyQtWebKit, lxml, six and Beautifulsoup4 are required.
+For windows pywin32 is recommended 
 
 To install all dependencies just use the console to navigate into the project folder and write
 
 ```
 pip install -r requirements.txt
 ```
-
-#### On Windows
-install pywin32:
--> [Pour python 3.4](https://sourceforge.net/projects/pywin32/files/pywin32/Build%20220/pywin32-220.win-amd64-py3.4.exe/download)  
--> [Last release](https://github.com/mhammond/pywin32/releases)
-
-For PyQt4 use the package at this address https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4
-
-#### On MacOs
-1. Install ANACONDA => https://www.anaconda.com/download/#macos
-2. Open a terminal
-3. conda install -c anaconda pyqt=4.11.4
 
 ### Usage
 
