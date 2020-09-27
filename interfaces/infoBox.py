@@ -6,27 +6,21 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
+    _encoding = QtWidgets.QApplication.UnicodeUTF8
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+        return QtCore.QCoreApplication.translate(context, text, disambig, _encoding)
 except AttributeError:
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+        return QtCore.QCoreApplication.translate(context, text, disambig)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
-        Dialog.setObjectName(_fromUtf8("Dialog"))
+        Dialog.setObjectName("Dialog")
         Dialog.resize(500, 104)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
@@ -34,26 +28,26 @@ class Ui_Dialog(object):
         Dialog.setMinimumSize(QtCore.QSize(500, 100))
         Dialog.setMaximumSize(QtCore.QSize(500, 104))
         Dialog.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
-        Dialog.setWhatsThis(_fromUtf8(""))
+        Dialog.setWhatsThis("")
         Dialog.setLayoutDirection(QtCore.Qt.LeftToRight)
-        Dialog.setStyleSheet(_fromUtf8("background-color: rgb(255, 255, 255);"))
-        self.horizontalLayout_2 = QtGui.QHBoxLayout(Dialog)
-        self.horizontalLayout_2.setMargin(0)
+        Dialog.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(Dialog)
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_2.setSpacing(0)
-        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        self.label = QtGui.QLabel(Dialog)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.label = QtWidgets.QLabel(Dialog)
         self.label.setMinimumSize(QtCore.QSize(100, 0))
         self.label.setMaximumSize(QtCore.QSize(100, 16777215))
-        self.label.setStyleSheet(_fromUtf8("background-image: url(:/root/info72x72.png);\n"
+        self.label.setStyleSheet("background-image: url(:/root/info72x72.png);\n"
 "background-repeat:no-repeat;\n"
-"background-position:center;"))
-        self.label.setText(_fromUtf8(""))
-        self.label.setObjectName(_fromUtf8("label"))
+"background-position:center;")
+        self.label.setText("")
+        self.label.setObjectName("label")
         self.horizontalLayout_2.addWidget(self.label)
-        self.verticalLayout = QtGui.QVBoxLayout()
+        self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setSpacing(0)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.label_2 = QtGui.QLabel(Dialog)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.label_2 = QtWidgets.QLabel(Dialog)
         self.label_2.setMinimumSize(QtCore.QSize(398, 65))
         self.label_2.setMaximumSize(QtCore.QSize(398, 65))
         font = QtGui.QFont()
@@ -62,25 +56,25 @@ class Ui_Dialog(object):
         self.label_2.setFont(font)
         self.label_2.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.label_2.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.label_2.setStyleSheet(_fromUtf8(""))
+        self.label_2.setStyleSheet("")
         self.label_2.setScaledContents(False)
         self.label_2.setWordWrap(True)
         self.label_2.setOpenExternalLinks(True)
         self.label_2.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.label_2.setObjectName("label_2")
         self.verticalLayout.addWidget(self.label_2)
-        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setSpacing(0)
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        spacerItem = QtGui.QSpacerItem(40, 10, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        spacerItem = QtWidgets.QSpacerItem(40, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.pushButton = QtGui.QPushButton(Dialog)
+        self.pushButton = QtWidgets.QPushButton(Dialog)
         self.pushButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.pushButton.setStyleSheet(_fromUtf8("background-color: rgb(200, 200, 200);"))
+        self.pushButton.setStyleSheet("background-color: rgb(200, 200, 200);")
         self.pushButton.setFlat(False)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
+        self.pushButton.setObjectName("pushButton")
         self.horizontalLayout.addWidget(self.pushButton)
-        spacerItem1 = QtGui.QSpacerItem(5, 10, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(5, 10, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_2.addLayout(self.verticalLayout)
@@ -94,3 +88,4 @@ class Ui_Dialog(object):
         self.pushButton.setText(_translate("Dialog", "&Ok", None))
 
 import r_rc
+

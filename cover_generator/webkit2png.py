@@ -24,12 +24,18 @@
 # can handle multiple requests at the same time.
 
 import time
+
+from PyQt5.QtWidgets import *
 import os
+
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtWebKit import *
-from PyQt4.QtNetwork import *
+from PyQt5.QtCore import *
+
+from PyQt5.QtGui import *
+from PyQt5.QtWebKit import *
+from PyQt5.QtWebKitWidgets import *
+from PyQt5.QtNetwork import *
+
 
 
 class WebkitRenderer(QObject):
@@ -189,10 +195,10 @@ class _WebkitRendererHelper(QObject):
 			self._page.settings().setAttribute(key, value)
 
 		# Connect required event listeners
-		self.connect(self._page, SIGNAL("loadFinished(bool)"), self._on_load_finished)
-		self.connect(self._page, SIGNAL("loadStarted()"), self._on_load_started)
-		self.connect(self._page.networkAccessManager(), SIGNAL("sslErrors(QNetworkReply *,const QList<QSslError>&)"), self._on_ssl_errors)
-		self.connect(self._page.networkAccessManager(), SIGNAL("finished(QNetworkReply *)"), self._on_each_reply)
+		self._page.loadFinished[bool].connect(self._on_load_finished)
+		self._page.loadStarted.connect(self._on_load_started)
+		self._page.networkAccessManager().sslErrors.connect(self._on_ssl_errors)
+		self._page.networkAccessManager().finished[QNetworkReply].connect(self._on_each_reply)
 
 		# The way we will use this, it seems to be unesseccary to have Scrollbars enabled
 		self._page.mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
@@ -246,16 +252,17 @@ class _WebkitRendererHelper(QObject):
 			self._page.mainFrame().render(painter)
 			painter.end()
 		else:
-			if self.grabWholeWindow:
-				# Note that this does not fully ensure that the
-				# window still has the focus when the screen is
-				# grabbed. This might result in a race condition.
-				self._view.activateWindow()
-				image = QPixmap.grabWindow(self._window.winId())
-			else:
-				image = QPixmap.grabWidget(self._window)
+			{}
+			# if self.grabWholeWindow:
+				# # Note that this does not fully ensure that the
+				# # window still has the focus when the screen is
+				# # grabbed. This might result in a race condition.
+				# self._view.activateWindow()
+				# image = QPixmap.grabWindow(self._window.winId())
+			# else:
+				# image = QPixmap.grabWidget(self._window)
 
-		return self._post_process_image(image)
+		return self._post_process_image(self._window.grab())
 
 	def _load_page(self, res, width, height, timeout):
 		"""

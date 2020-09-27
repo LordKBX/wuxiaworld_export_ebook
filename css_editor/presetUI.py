@@ -6,44 +6,38 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
+    _encoding = QtWidgets.QApplication.UnicodeUTF8
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+        return QtCore.QCoreApplication.translate(context, text, disambig, _encoding)
 except AttributeError:
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+        return QtCore.QCoreApplication.translate(context, text, disambig)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
-        Dialog.setObjectName(_fromUtf8("Dialog"))
+        Dialog.setObjectName("Dialog")
         Dialog.resize(400, 60)
         Dialog.setMinimumSize(QtCore.QSize(400, 60))
         Dialog.setMaximumSize(QtCore.QSize(400, 60))
-        self.horizontalLayout = QtGui.QHBoxLayout(Dialog)
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.label = QtGui.QLabel(Dialog)
+        self.horizontalLayout = QtWidgets.QHBoxLayout(Dialog)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.label = QtWidgets.QLabel(Dialog)
         self.label.setMaximumSize(QtCore.QSize(80, 30))
-        self.label.setStyleSheet(_fromUtf8("background-color: rgb(204, 204, 204);padding-left:5px;"))
-        self.label.setObjectName(_fromUtf8("label"))
+        self.label.setStyleSheet("background-color: rgb(204, 204, 204);padding-left:5px;")
+        self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
-        self.comboBox = QtGui.QComboBox(Dialog)
+        self.comboBox = QtWidgets.QComboBox(Dialog)
         self.comboBox.setMinimumSize(QtCore.QSize(0, 30))
         self.comboBox.setMaximumSize(QtCore.QSize(16777215, 30))
-        self.comboBox.setObjectName(_fromUtf8("comboBox"))
+        self.comboBox.setObjectName("comboBox")
         self.horizontalLayout.addWidget(self.comboBox)
-        self.pushButton = QtGui.QPushButton(Dialog)
+        self.pushButton = QtWidgets.QPushButton(Dialog)
         self.pushButton.setMinimumSize(QtCore.QSize(80, 30))
         self.pushButton.setMaximumSize(QtCore.QSize(80, 30))
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
+        self.pushButton.setObjectName("pushButton")
         self.horizontalLayout.addWidget(self.pushButton)
 
         self.retranslateUi(Dialog)

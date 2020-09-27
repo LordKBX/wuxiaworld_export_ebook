@@ -1,26 +1,24 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 import os
 import os.path
 import ctypes
 from bs4 import BeautifulSoup
-
 import interface
 import presetUI
 import syntax
 
-try:
-	_fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-	def _fromUtf8(s):
-		return s
+print(sys.argv)
+destDir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+if len(sys.argv) >=2:
+	destDir = sys.argv[1]
 
 app = None
 dialog = None
 dialog2 = None
 window2 = None
-urlBase = 'file://'+os.path.dirname(os.path.dirname(os.path.realpath(__file__))).replace('\\', '/')
-urlBase_clean = os.path.dirname(os.path.dirname(os.path.realpath(__file__))).replace('\\', '/')
+urlBase = 'file:///'+destDir.replace('\\', '/')
+urlBase_clean = destDir.replace('\\', '/')
 highlightTimer = None
 highlight = None
 checkFontTimer = None
@@ -54,11 +52,11 @@ def changePage():
 	if check_is_toc is not current_is_toc:
 		print('changePage')
 		if check_is_toc is True:
-			dialog.webView.setUrl(QtCore.QUrl(_fromUtf8(urlBase_clean+"/tmp/toc.xhtml")))
+			dialog.webView.setUrl(QtCore.QUrl(urlBase+"/tmp/toc.xhtml"))
 			file2 = open(urlBase_clean+"/tmp/toc.xhtml", "rb")
 			
 		else:
-			dialog.webView.setUrl(QtCore.QUrl(_fromUtf8(urlBase_clean+"/tmp/ch-1.xhtml")))
+			dialog.webView.setUrl(QtCore.QUrl(urlBase+"/tmp/ch-1.xhtml"))
 			file2 = open(urlBase_clean+"/tmp/ch-1.xhtml", "rb")
 		soup = BeautifulSoup(file2, 'html.parser')
 		dialog.plainTextEdit.setPlainText(soup.prettify())
@@ -88,7 +86,7 @@ def clickSave():
 def load_preset():
 	global urlBase_clean, dialog2, window2
 	dialog2 = presetUI.Ui_Dialog()
-	window2 = QtGui.QDialog()
+	window2 = QtWidgets.QDialog()
 	dialog2.setupUi(window2)
 	window2.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
 	
@@ -126,12 +124,12 @@ def load_preset2():
 	clickPreview()
 
 
-class MyWindow(QtGui.QDialog):
+class MyWindow(QtWidgets.QDialog):
 	def closeEvent(self, event):
 		event.ignore()
-		result = QtGui.QMessageBox.question(self, "Confirm Exit...", "Are you sure you want to exit ?", QtGui.QMessageBox.Yes| QtGui.QMessageBox.No)
+		result = QtWidgets.QMessageBox.question(self, "Confirm Exit...", "Are you sure you want to exit ?", QtWidgets.QMessageBox.Yes| QtWidgets.QMessageBox.No)
 		
-		if result == QtGui.QMessageBox.Yes:
+		if result == QtWidgets.QMessageBox.Yes:
 			event.accept()
 
 
@@ -139,7 +137,7 @@ if __name__ == '__main__':
 	myappid = 'wuxiaworld.epubcreator.qt4.2'  # arbitrary string
 	if os.name == 'nt':
 		ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-	app = QtGui.QApplication([])
+	app = QtWidgets.QApplication([])
 	dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 	app_icon = QtGui.QIcon()
 	app_icon.addFile(dir+'/ressources/icon16x16.png', QtCore.QSize(16,16))

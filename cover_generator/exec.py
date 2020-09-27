@@ -25,7 +25,7 @@
 # can handle multiple requests at the same time.
 
 from webkit2png import WebkitRenderer
-
+from PyQt5.QtWidgets import *
 import sys
 import signal
 import os
@@ -33,11 +33,10 @@ import ctypes
 import urllib.parse
 import logging
 from optparse import OptionParser
-
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtWebKit import *
-from PyQt4.QtNetwork import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWebKit import *
+from PyQt5.QtNetwork import *
 
 VERSION = "20091224"
 LOG_FILENAME = 'tmp/webkit2png.log'
@@ -167,7 +166,8 @@ def main():
 		parser.error("incorrect number of arguments")
 	if options.display and options.xvfb:
 		parser.error("options -x and -d are mutually exclusive")
-	options.url = args[0]
+	print(args[0])
+	options.url = 'file:///'+args[0].replace('\\', '/')
 
 	logging.basicConfig(filename=options.logfile,level=logging.WARN,)
 

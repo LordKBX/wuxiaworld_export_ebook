@@ -6,12 +6,10 @@ import sys
 import copy
 from bs4 import BeautifulSoup
 
-
 def import_data(link: str, novel: str, limited: int):
 	#link = 'https://www.wuxiaworld.com/novel/child-of-light'
 	print(link)
 	file_name = 'import.html'
-
 	url = urllib.request.Request(
 		link,
 		data=None,
@@ -19,17 +17,13 @@ def import_data(link: str, novel: str, limited: int):
 			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 			}
 		)
-
 	with urllib.request.urlopen(url) as response, open(file_name, 'wb') as out_file:
 		shutil.copyfileobj(response, out_file)
-
 	f = open(file_name, "r", encoding="utf8")
 	soup = BeautifulSoup(f, 'html.parser')
 	with_volume = False
-
 	books = {}
 	alt_books = []
-
 	tab = soup.find_all('ul')
 	sttr = '{}'.format(tab)
 	find1 = sttr.find('Chapter 1 ')
@@ -48,14 +42,16 @@ def import_data(link: str, novel: str, limited: int):
 		tbl = '{}'.format(block)
 		if tbl.find('list-chapters') != -1:
 			tab2 = block.find_all('li')
+			# print(tab2)
 			last = '0'
 			for li in tab2:
+				print(li.find('a').contents[0]);
 				if with_volume is False:
 					if limited == 1:
 						if len(books['Book 0']) >= 45: break
-					books['Book 0'].append({'name': li.find('span').string, 'url': li.find('a').get('href')})
+					books['Book 0'].append({'name': li.find('a').contents[0].replace('\r', '').replace('\n', '').strip(), 'url': li.find('a').get('href')})
 				else:
-					span = li.find('span').string.strip()
+					span = li.find('a').contents[0]
 					pos1 = span.find(',')
 					pos2 = span.find(':')
 					if pos1 == -1:
@@ -68,7 +64,7 @@ def import_data(link: str, novel: str, limited: int):
 						if pos1 < pos2: tb = span.split(',')
 						else: tb = span.split(':')
 					if len(tb) < 2: 
-						name = li.find('span').string.strip()
+						name = li.find('a').contents[0].replace('\r', '').replace('\n', '').strip()
 						nbvol = last
 					else:
 						name = tb[1].strip()
@@ -79,21 +75,19 @@ def import_data(link: str, novel: str, limited: int):
 					if 'Book '+nbvol not in books:
 						books['Book '+nbvol] = []
 					books['Book '+nbvol].append({'name': name, 'url': li.find('a').get('href')})
-
 	#print(books)
-
 	res = soup.find(id="accordion")
 	tab = res.find_all('div')
 	mb = {}
 	for block in tab:
 		tbl = '{}'.format(block)
 		if tbl.find('panel panel-default') > -1:
-			mb = {'title': block.find('a').string.strip(), 'chapters': []}
+			mb = {'title': block.find('a').contents[0].replace('\r', '').replace('\n', '').strip(), 'chapters': []}
 			links = block.find_all('li')
 			for li in links:
 				tb2 = '{}'.format(li)
 				if tb2.find('chapter-item') > -1:
-					mb['chapters'].append({'name':li.find('span').string.strip(), 'url':li.find('a').get('href')})
+					mb['chapters'].append({'name':li.find('a').contents[0].replace('\r', '').replace('\n', '').strip(), 'url':li.find('a').get('href')})
 			alt_books.append(mb)
 		if limited == 1: break
 	#print(alt_books)

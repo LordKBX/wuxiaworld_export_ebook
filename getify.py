@@ -8,16 +8,14 @@ import sys
 import traceback
 from subprocess import call
 import base64
-
 from bs4 import BeautifulSoup
 import uuid
-
+import html
 
 def find_between(file):
 	f = open(file, "r", encoding = "utf8")
 	soup = BeautifulSoup(f, 'html.parser')
 	return soup.title
-
 
 def download(link, file_name):
 	"""Downloads web page from Wuxiaworld and saves it into the folder where the programm is located"""
@@ -25,15 +23,12 @@ def download(link, file_name):
 		link,
 		data=None,
 		headers={
-			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) \
-AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 			}
 		)
-
 	with urllib.request.urlopen(url) as response, open(file_name, 'wb') as out_file:
 		shutil.copyfileobj(response, out_file)
 	"""Extract Text from Wuxiaworld html file and saves it into a seperate xhtml file"""
-
 
 def clean(file_name_in, file_name_out, start):
 	has_spoiler = None
@@ -44,7 +39,7 @@ def clean(file_name_in, file_name_out, start):
 	chapter_title = chapter_title.text
 	soups = soup.find_all(class_="fr-view")
 	for block in soups:
-		if not block.has_attr('id'):
+		if block.has_attr('id'):
 			soup = block
 			break
 	for a in soup.find_all("a"):
@@ -63,7 +58,6 @@ def clean(file_name_in, file_name_out, start):
 	file.write("\n</body>")
 	file.write("\n</html>")
 	os.remove(file_name_in)
-
 
 def update_progress(progress):
 	"""Displays and updates the download progress bar"""
@@ -87,7 +81,6 @@ def update_progress(progress):
 	sys.stdout.write(text)
 	sys.stdout.flush()
 
-
 def cover_generator(src, novel, book_name, author):
 	""" This will download a cover, calculating the average complementary color
 	and will wirte the chapter range on the upper half of the cover centered
@@ -100,8 +93,9 @@ def cover_generator(src, novel, book_name, author):
 		storage_dir = os.path.expanduser("~") + os.sep + "wuxiaworld_export_ebook"
 	if os.path.isdir(storage_dir + os.sep + "tmp") is False:
 		os.mkdirs(storage_dir + os.sep + "tmp")
-		
-	urllib.request.urlretrieve(src, storage_dir + os.sep + "tmp" + os.sep + "origin_cover")
+	print("Call URL :"+src);
+	print("Store URL :"+storage_dir + os.sep + "tmp" + os.sep + "origin_cover");
+	download(src, storage_dir + os.sep + "tmp" + os.sep + "origin_cover")
 	
 	file1 = open(storage_dir + os.sep + "tmp" + os.sep + "origin_cover", "rb")
 	file2 = open(current_dir + os.sep + "ressources" + os.sep + "jacket.xhtml", "rb")
@@ -109,7 +103,6 @@ def cover_generator(src, novel, book_name, author):
 	cov = file1.read()
 	jacket = file2.read()
 	file2.close()
-
 	covi = base64.b64encode(cov).decode('utf-8')
 	ext = ""
 	if covi.startswith('iVBOR') is True:
@@ -138,7 +131,6 @@ def cover_generator(src, novel, book_name, author):
 	# os.remove(storage_dir + os.sep + "tmp" + os.sep + "origin_cover.jpg")
 	# os.remove(storage_dir + os.sep + "tmp" + os.sep + "jacket.xhtml")
 
-
 def generate_name(novelname, author, chaptername, book, chapter_s, chapter_e):
 	file_name = ''
 	if book is None:
@@ -149,7 +141,6 @@ def generate_name(novelname, author, chaptername, book, chapter_s, chapter_e):
 		else:
 			file_name = novelname + " - {} - {}-{}".format(book, chapter_s, chapter_e)
 	return author + ' - ' + file_name
-
 
 def generate(html_files, novelname, author, chaptername, book, chapter_s, chapter_e):
 	""" Saves downloaded xhtml files into the epub format while also
@@ -176,7 +167,6 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	epub = zipfile.ZipFile(storage_dir + os.sep + "export/" + author + ' - ' + file_name + ".epub", "w")
 	# The first file must be named "mimetype"
 	epub.writestr("mimetype", "application/epub+zip")
-
 	"""
 	The filenames of the HTML are listed in html_files
 	We need an index file, that lists all other HTML files
@@ -188,7 +178,6 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 			<rootfile full-path="OEBPS/Content.opf" media-type="application/oebps-package+xml"/>\
 		</rootfiles>\
 	</container>')
-
 	# The index file is another XML file, living per convention
 	# in OEBPS/Content.xml
 	uniqueid = uuid.uuid1().hex
@@ -214,7 +203,6 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 				%(spine)s
 			</spine>
 		</package>'''
-
 	manifest = ""
 	spine = ""
 	metadata = '''<dc:title xmlns:dc="http://purl.org/dc/elements/1.1/">%(novelname)s</dc:title>
@@ -224,21 +212,18 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 		<dc:identifier xmlns:dc="http://purl.org/dc/elements/1.1/">%(uuid)s"</dc:identifier>''' % {
 		"novelname": file_name, "author": author, "uuid": uniqueid}
 	toc_manifest = '<item href="toc.xhtml" id="toc" properties="nav" media-type="application/xhtml+xml"/>'
-
 	# Write each HTML file to the ebook, collect information for the index
 	for i, html in enumerate(html_files):
 		basename = os.path.basename(html)
 		manifest += '<item id="file_%s" href="%s" media-type="application/xhtml+xml"/>' % (i+1, basename)
 		spine += '<itemref idref="file_%s" />' % (i+1)
 		epub.write(html, "OEBPS/"+basename)
-
 	# Finally, write the index
 	epub.writestr("OEBPS/Content.opf", index_tpl % {
 		"metadata": metadata,
 		"manifest": manifest + toc_manifest,
 		"spine": spine,
 		})
-
 	epub.writestr("OEBPS/toc.xhtml", generate_toc(html_files, novelname))
 	
 	epub.write(storage_dir + os.sep + "tmp/cover.png", "OEBPS/cover.png")
@@ -262,12 +247,15 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	epub.write("./ressources/fonts/"+font+"/Italic.ttf", "OEBPS/Italic.ttf")
 	
 	epub.close()
-
 	# removes all the temporary files
 	for x in html_files:
 		try: os.remove(x)
 		except: {}
-
+		
+def unicodeToHTMLEntities(text):
+    """Converts unicode to HTML entities.  For example '&' becomes '&amp;'."""
+    text = html.escape(text, True).encode('ascii', 'xmlcharrefreplace').decode('ascii')
+    return text
 
 def generate_toc(html_files, novel):
 	# Generates a Table of Contents + lost strings
@@ -293,11 +281,10 @@ def generate_toc(html_files, novel):
 			%(toc_end)s'''
 	toc_mid = ""
 	toc_end = '''</ol></nav></section></body></html>'''
-
 	for i, y in enumerate(html_files):
 		ident = 0
 		chapter = find_between(html_files[i])
-		chapter = str(chapter).replace('title>', 'span>')
+		chapter = unicodeToHTMLEntities( str(chapter).replace('title>', 'span>').replace('span>', '').replace('</', '').replace('<', '') )
 		toc_mid += '''<li class="toc-Chapter-rw" id="num_%s">
 			<a href="%s">%s</a>
 			</li>''' % (i, os.path.basename(html_files[i]), chapter)

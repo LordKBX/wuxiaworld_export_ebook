@@ -7,7 +7,7 @@ import traceback
 from urllib.error import HTTPError, URLError
 import time
 import subprocess
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 if os.name == 'nt':
 	import ctypes
 
@@ -20,7 +20,6 @@ import getify
 
 conn = None
 cursor = None
-
 storage_dir = ''
 novel = ''
 data_novel = {}
@@ -34,22 +33,16 @@ styleUpdateGreen = 'background-color:#55AA00;color: #ffffff;'
 threadpool = None
 outdatedScript = False
 
-
 class WorkerSignals(QtCore.QObject):
 	"""
 	Defines the signals available from a running worker thread.
-
 	Supported signals are:
-
 	finished
 		No data
-
 	error
 		`tuple` (exctype, value, traceback.format_exc() )
-
 	result
 		`object` data returned from processing, anything
-
 	progress
 		`int` indicating % progress
 	"""
@@ -58,38 +51,30 @@ class WorkerSignals(QtCore.QObject):
 	result = QtCore.pyqtSignal(object)
 	progress = QtCore.pyqtSignal(list)
 
-
 class Worker(QtCore.QRunnable):
 	"""
 	Worker thread
-
 	Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
-
 	:param callback: The function callback to run on this worker thread. Supplied args and kwargs will be passed
 																						through to the runner.
 	:type callback: function
 	:param args: Arguments to pass to the callback function
 	:param kwargs: Keywords to pass to the callback function
 	"""
-
 	def __init__(self, fn, *args, **kwargs):
 		super(Worker, self).__init__()
-
 		# Store constructor arguments (re-used for processing)
 		self.fn = fn
 		self.args = args
 		self.kwargs = kwargs
 		self.signals = WorkerSignals()
-
 		# Add the callback to our kwargs
 		self.kwargs['progress_callback'] = self.signals.progress
-
 	@QtCore.pyqtSlot()
 	def run(self):
 		"""
 		Initialise the runner function with passed args, kwargs.
 		"""
-
 		# Retrieve args/kwargs here; and fire processing using them
 		try:
 			result = self.fn(*self.args, **self.kwargs)
@@ -102,7 +87,6 @@ class Worker(QtCore.QRunnable):
 		finally:
 			self.signals.finished.emit() 
 
-
 def worker_progress(status):
 	updateStatus(status[0])
 	try: print(status[0])
@@ -110,30 +94,26 @@ def worker_progress(status):
 	try: dialog.statusProgressBar.setProperty("value", status[1])
 	except: {}
 
-
 def worker_print_output(s):
 	print(s)
-
 
 def exitWindow():
 	global generating, window
 	window.close()
 
-
 def updateStatus(message:str, green=False):
 	global dialog, styleUpdateGrey, styleUpdateGreen
 	try:
-		if green is True: dialog.statusLabel.setStyleSheet(interface._fromUtf8(styleUpdateGreen))
-		else: dialog.statusLabel.setStyleSheet(interface._fromUtf8(styleUpdateGrey))
+		if green is True: dialog.statusLabel.setStyleSheet(interface.styleUpdateGreen)
+		else: dialog.statusLabel.setStyleSheet(interface.styleUpdateGrey)
 		dialog.statusLabel.setText(message)
 	except:{}
-
 
 def infoDialog(title, message, modal=True):
 	global app_icon
 	#if modal is True:
 	dialog = infoBox.Ui_Dialog()
-	window = QtGui.QDialog()
+	window = QtWidgets.QDialog()
 	dialog.setupUi(window)
 	window.setWindowTitle(title)
 	window.setWindowIcon(app_icon)
@@ -141,7 +121,6 @@ def infoDialog(title, message, modal=True):
 	dialog.label_2.setText(message)
 	dialog.pushButton.clicked.connect(window.close)
 	window.exec_()
-
 
 def check_script_version():
 	global outdatedScript
@@ -151,7 +130,6 @@ def check_script_version():
 	worker.signals.finished.connect(check_script_version_end)
 	worker.signals.progress.connect(worker_progress)
 	threadpool.start(worker)
-
 
 def check_script_version_mid(progress_callback):
 	global outdatedScript
@@ -178,7 +156,6 @@ def check_script_version_mid(progress_callback):
 		if version_locale.strip() not in version_online.strip():
 			outdatedScript = True
 
-
 def check_script_version_end():
 	global outdatedScript
 	if outdatedScript is True:
@@ -191,10 +168,9 @@ def check_script_version_end():
 			)
 	else: print('< Script up to date')
 
-
-def check_database():
+def check_database(forced=False):
 	global generating
-	if time.time() - float(os.path.getmtime(storage_dir + os.sep + "novels.db")) >= 172800.0: #test 43200 = 12h, 172800 = 48h
+	if time.time() - float(os.path.getmtime(storage_dir + os.sep + "novels.db")) >= 172800.0 or forced is True: #test 43200 = 12h, 172800 = 48h
 		generating = True
 		worker = Worker(check_database_mid) # Any other args, kwargs are passed to the run function
 		worker.signals.finished.connect(check_database_end)
@@ -203,12 +179,10 @@ def check_database():
 		infoDialog('Info', 'Start database update', False)
 	else: check_database_final()
 
-
 def check_database_mid(progress_callback):
 	print('> Updating Novel Database')
 	database_updator.parent = progress_callback
 	database_updator.start()
-
 
 def check_database_end():
 	os.utime(storage_dir + os.sep + "novels.db")
@@ -217,7 +191,6 @@ def check_database_end():
 	print(status)
 	dialog.statusProgressBar.setProperty("value", 100)
 	check_database_final()
-
 
 def check_database_final():
 	global conn, cursor, generating
@@ -232,7 +205,6 @@ def check_database_final():
 		namelist.sort()
 	dialog.novelSelector.clear()
 	dialog.novelSelector.addItems(namelist)
-
 
 def changeFont():
 	global dialog
@@ -264,7 +236,6 @@ def changeFont():
 	except: 
 		traceback.print_exc()
 
-
 def lockInterface(full=False):
 	global dialog
 	if full is True:
@@ -276,14 +247,12 @@ def lockInterface(full=False):
 	dialog.endingChapterSelector.setEnabled(False)
 	dialog.fontSelector.setEnabled(False)
 
-
 def unlockInterface():
 	global dialog
 	dialog.novelSelector.setEnabled(True)
 	dialog.modeSlider.setEnabled(True)
 	dialog.totalExportSlider.setEnabled(True)
 	dialog.fontSelector.setEnabled(True)
-
 
 def changeNovel():
 	global novel, cursor, data_novel
@@ -306,14 +275,12 @@ def changeNovel():
 		
 		QtCore.QTimer.singleShot(200, changeNovelPart2)
 
-
 def changeNovelPart2():
 	global novel, data_novel
 	data_novel['books'], data_novel['alt_books'] = novel_data.import_data(data_novel['link'], novel, data_novel['limited'])
 	unlockInterface()
 	export_mode_change()
 	updateStatus( "Data for novel '{}' loaded at {}".format( novel, time.asctime() ) )
-
 
 def export_mode_change():
 	global dialog, novel, cursor, data_novel
@@ -350,7 +317,6 @@ def export_mode_change():
 		dialog.endingChapterSelector.addItems([])
 		dialog.endingChapterSelector.setEnabled(False)
 
-
 def book_change():
 	global dialog, novel, cursor, data_novel
 	export_mode = dialog.modeSlider.value()
@@ -375,7 +341,6 @@ def book_change():
 	dialog.endingChapterSelector.setEnabled(True)
 	dialog.endingChapterSelector.setCurrentIndex(len(chapters) - 1)
 
-
 def preview():
 	global dialog, app, novel, cursor, data_novel, generating
 	if generating is True: return
@@ -389,10 +354,10 @@ def preview():
 	
 	getify.cover_generator(data_novel['cover'], novel, book, data_novel['autor'])
 		
-	file2 = open("./ressources/common.css", "r")
+	file2 = open(storage_dir+"/ressources/common.css", "r")
 	css = file2.read()
 	file2.close()
-	file3 = open("./tmp/common.css", "w")
+	file3 = open(storage_dir+"/tmp/common.css", "w")
 	file3.write(css.replace('<FONT>', dialog.fontSelector.currentText()))
 	file3.close()
 	
@@ -400,8 +365,8 @@ def preview():
 	
 	link = data_novel['books'][book][0]['url']
 	ti = link.split('/')
-	filename = "./tmp/"+ti[len(ti) - 1] + ".xhtml"
-	filenameOut = "./tmp/"+'ch-{}'.format(1)
+	filename = storage_dir+"/tmp/"+ti[len(ti) - 1] + ".xhtml"
+	filenameOut = storage_dir+"/tmp/"+'ch-{}'.format(1)
 	
 	try:
 		getify.download('https://www.wuxiaworld.com' + link, filename)
@@ -415,12 +380,11 @@ def preview():
 		getify.clean(filename, filenameOut, novel)
 		filenameOut += ".xhtml"
 		text_toc = getify.generate_toc([filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut], novel)
-		file3  = open("./tmp/toc.xhtml", "w")
+		file3  = open(storage_dir+"/tmp/toc.xhtml", "w")
 		file3.write(text_toc)
 		file3.close()
-		command1 = subprocess.Popen([sys.executable, "./css_editor/launch.py"])
+		command1 = subprocess.Popen([sys.executable, "./css_editor/launch.py", storage_dir])
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-
 
 def generate():
 	global dialog, novel, data_novel, generating, threadpool
@@ -437,10 +401,8 @@ def generate():
 	worker.signals.result.connect(worker_print_output)
 	worker.signals.finished.connect(generate_end)
 	worker.signals.progress.connect(worker_progress)
-
 	# Execute
 	threadpool.start(worker)
-
 
 def generate_mid(progress_callback):
 	global dialog, novel, data_novel
@@ -577,7 +539,6 @@ def generate_mid(progress_callback):
 				progress_callback.emit(['generating {} => {}'.format(block['title'], getify.generate_name(novel, data_novel['autor'], 'ch-', block['title'], None, None)), pos])
 				getify.generate(file_list, novel, data_novel['autor'], 'ch-', block['title'], None, None)
 
-
 def generate_end():
 	global dialog, app, novel, cursor, data_novel, generating
 	status = "Task finished at {}".format(time.asctime())
@@ -599,7 +560,6 @@ def generate_end():
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
 	subprocess.Popen('explorer "' + os.path.dirname(os.path.realpath(__file__)) + os.sep + 'export' + '"')
 
-
 def clean_folder(folder):
 	for the_file in os.listdir(folder):
 		file_path = os.path.join(folder, the_file)
@@ -610,20 +570,17 @@ def clean_folder(folder):
 		except Exception as e:
 			print(e)
 
-
-class MyWindow(QtGui.QMainWindow):
+class MyWindow(QtWidgets.QMainWindow):
 	def closeEvent(self,event):
 		global generating
 		event.ignore()
 		if generating is True: return
-		result = QtGui.QMessageBox.question(self, "Confirm Exit...", "Are you sure you want to exit ?", QtGui.QMessageBox.Yes| QtGui.QMessageBox.No)
+		result = QtWidgets.QMessageBox.question(self, "Confirm Exit...", "Are you sure you want to exit ?", QtWidgets.QMessageBox.Yes| QtWidgets.QMessageBox.No)
 		
-		if result == QtGui.QMessageBox.Yes:
+		if result == QtWidgets.QMessageBox.Yes:
 			event.accept()
 
-
 def isUserAdmin():
-
 	if os.name == 'nt':
 		import ctypes
 		# WARNING: requires Windows XP SP2 or higher!
@@ -639,18 +596,14 @@ def isUserAdmin():
 	else:
 		raise(RuntimeError, "Unsupported operating system for this module: {}".format(os.name))
 
-
 def runAsAdmin(cmdLine=None, wait=True):
-
 	if os.name != 'nt':
 		raise(RuntimeError, "This function is only implemented on Windows.")
-
 	import win32api, win32con, win32event, win32process
 	from win32com.shell.shell import ShellExecuteEx
 	from win32com.shell import shellcon
 
 	python_exe = sys.executable
-
 	if cmdLine is None:
 		cmdLine = [python_exe] + sys.argv
 	elif type(cmdLine) not in (types.TupleType,types.ListType):
@@ -662,34 +615,27 @@ def runAsAdmin(cmdLine=None, wait=True):
 	showCmd = win32con.SW_SHOWNORMAL
 	#showCmd = win32con.SW_HIDE
 	lpVerb = 'runas'  # causes UAC elevation prompt.
-
 	# print "Running", cmd, params
-
 	# ShellExecute() doesn't seem to allow us to fetch the PID or handle
 	# of the process, so we can't get anything useful from it. Therefore
 	# the more complex ShellExecuteEx() must be used.
-
 	# procHandle = win32api.ShellExecute(0, lpVerb, cmd, params, cmdDir, showCmd)
-
 	procInfo = ShellExecuteEx(nShow=showCmd,
 							  fMask=shellcon.SEE_MASK_NOCLOSEPROCESS,
 							  lpVerb=lpVerb,
 							  lpFile=cmd,
 							  lpParameters=params)
-
 	if wait:
 		procHandle = procInfo['hProcess']	
 		obj = win32event.WaitForSingleObject(procHandle, win32event.INFINITE)
 		rc = win32process.GetExitCodeProcess(procHandle)
 	else:
 		rc = None
-
 	return rc
-
 
 if __name__ == '__main__':
 	threadpool = QtCore.QThreadPool()
-	myappid = 'wuxiaworld.epubcreator.qt4.2' # arbitrary string
+	myappid = 'wuxiaworld.epubcreator.qt5' # arbitrary string
 	storage_dir = os.path.realpath(__file__)
 	if os.name == 'nt':
 		storage_dir = os.path.expanduser("~") + os.sep + "wuxiaworld_export_ebook"
@@ -702,19 +648,25 @@ if __name__ == '__main__':
 		os.mkdir(storage_dir + os.sep + "export")
 	if os.path.isdir(storage_dir + os.sep + "ressources") is False:
 		os.mkdir(storage_dir + os.sep + "ressources")
-
 	if os.name == 'nt':
-		if os.path.isfile(storage_dir + os.sep + "ressources" + os.sep + "common.css") is False:
-			shutil.copy2(
-				os.path.dirname(os.path.realpath(__file__)) + os.sep + "ressources" + os.sep + "common.css",
-				storage_dir + os.sep + "ressources" + os.sep + "common.css"
-			)
-		if os.path.isdir(storage_dir + os.sep + "ressources" + os.sep + "themes") is False:
-			os.mkdir(storage_dir + os.sep + "ressources" + os.sep + "themes")
-			o = os.path.dirname(os.path.realpath(__file__)) + os.sep + "ressources" + os.sep + "themes"
-			d = storage_dir + os.sep + "ressources" + os.sep + "themes"
-			for item in os.listdir(o):
-				shutil.copy2(o + os.sep + item, d + os.sep + item)
+		refFileList = [
+		"ressources" + os.sep + "malgun.ttf",
+		"ressources" + os.sep + "loading_fonts.txt",
+		"ressources" + os.sep + "common.css"
+		]
+		refDirList = [
+		"ressources" + os.sep + "themes",
+		"ressources" + os.sep + "fonts"
+		]
+		for row in refFileList:
+			if os.path.isfile(storage_dir + os.sep + row) is False:
+				shutil.copy2( os.path.dirname(os.path.realpath(__file__)) + os.sep + row, storage_dir + os.sep + row )
+		for row in refDirList:
+			if os.path.isdir(storage_dir + os.sep + row) is False:
+				o = os.path.dirname(os.path.realpath(__file__)) + os.sep + row
+				d = storage_dir + os.sep + row
+				shutil.copytree(o , d)
+					
 		if os.path.isfile(storage_dir + os.sep + "novels.db") is False:
 			tconn = sql.connect(storage_dir + os.sep + "novels.db")
 			tcursor = tconn.cursor()
@@ -730,7 +682,7 @@ if __name__ == '__main__':
 				if not isUserAdmin():
 					rc = runAsAdmin()
 					exit(0)
-	app = QtGui.QApplication([])
+	app = QtWidgets.QApplication([])
 	
 	dir = os.path.dirname(os.path.realpath(__file__))
 	os.chdir(dir)
@@ -750,7 +702,10 @@ if __name__ == '__main__':
 	if 'noupdate' not in sys.argv:
 		if os.path.isdir('./tmp') is False: os.mkdir('./tmp')
 		clean_folder(dir+os.sep+'tmp')
-		check_database()
+		if 'update' in sys.argv:
+			check_database(True)
+		else:
+			check_database()
 		check_script_version()
 		checkVersionTimer = QtCore.QTimer()
 		checkVersionTimer.timeout.connect(check_script_version)
@@ -776,7 +731,6 @@ if __name__ == '__main__':
 				fontmax += 1
 	except Exception as err:
 		traceback.print_exc()
-
 	# set values
 	updateStatus('')
 	

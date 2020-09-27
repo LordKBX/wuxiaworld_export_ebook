@@ -1,3 +1,4 @@
-beautifulsoup4==4.6.0
-lxml==4.1.1
-PyQt4==4.11.4
+beautifulsoup4>=4.6.0
+lxml>=4.1.1
+PyQt5>=5.15.1
+PyQtWebKit>=5.13.1
