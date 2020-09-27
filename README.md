@@ -5,8 +5,6 @@ Based on a Fork of [Wuxiaworld-2-eBook](https://github.com/MakeYourLifeEasier/Wu
 
 ## Getting Started
 
-To run this script you'll need to have Python >=3.5.x installed which you can find [here](https://www.python.org/downloads/ "Python Download Link").
-
 ### Features
 
 - Download and save you favorite Novels from wuxiaworld.com into a .epub file
@@ -14,25 +12,38 @@ To run this script you'll need to have Python >=3.5.x installed which you can fi
 - Customizable style whith a style editor/previewer
 - Automatic update of the novel database if database file last modification >= 12h
 
+### Prerequisites
+
+Require Python >= 3.5.x
+Require the followin complements:
+- PyQt5
+- PyQtWebKit
+- lxml
+- six
+- Beautifulsoup4
+- pywin32(optional on windows)
+
 ### Installation
-manually: look for the next section
-
-Windows installer:  [>>>link<<<](https://github.com/LordKBX/wuxiaworld_export_ebook/releases)
-
+#### Windows installer: 
+Go to the Release page [Here](https://github.com/LordKBX/wuxiaworld_export_ebook/releases), contains:
 - executable with all dependancies (full version) (noob pack)
 - executable without dependancies (light version)
 
-### Prerequisites
-
-As mentioned before this script was written for Python >=3.5.x.
-
-Additionally the packages PyQt5, PyQtWebKit, lxml, six and Beautifulsoup4 are required.
-For windows pywin32 is recommended 
-
-To install all dependencies just use the console to navigate into the project folder and write
-
+#### Manualy
+#### On Windows and Mac
+1. Install Python >=3.5.x which you can find [here](https://www.python.org/downloads/ "Python Download Link"). Do not forget the PATH inclusion(checked by default)
+2. Run
 ```
 pip install -r requirements.txt
+```
+#### On Linux(Ubuntu)
+1. Run 
+```
+sudo apt-get install python3
+```
+2. Run
+```
+sudo pip3 install -r requirements.txt
 ```
 
 ### Usage
