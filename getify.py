@@ -31,6 +31,7 @@ def download(link, file_name):
 	"""Extract Text from Wuxiaworld html file and saves it into a seperate xhtml file"""
 
 def clean(file_name_in, file_name_out, start):
+	suplementList = []
 	has_spoiler = None
 	raw = open(file_name_in, "r", encoding="utf8")
 	soup = BeautifulSoup(raw, 'lxml')
@@ -40,6 +41,23 @@ def clean(file_name_in, file_name_out, start):
 	soups = soup.find_all(class_="fr-view")
 	for block in soups:
 		if block.has_attr('id'):
+			for script in soup.findAll('script'):
+				script.extract() 
+			cpt = 1
+			for img in block.findAll('img'):
+				tb = img['src'].split('?')[0].split('.')
+				imgext = tb[len(tb) - 1]
+				imgname = file_name_out + '_im{}'.format(cpt)+'.'+imgext
+				tb = imgname.split('/')
+				imgname2 = tb[len(tb) - 1]
+				print(img['src'])
+				try:
+					download(img['src'], imgname)
+					img['src'] = 'images/'+imgname2
+					suplementList.append(imgname2)
+				except:
+					{}
+				cpt += 1
 			soup = block
 			break
 	for a in soup.find_all("a"):
@@ -58,6 +76,7 @@ def clean(file_name_in, file_name_out, start):
 	file.write("\n</body>")
 	file.write("\n</html>")
 	os.remove(file_name_in)
+	return suplementList
 
 def update_progress(progress):
 	"""Displays and updates the download progress bar"""
@@ -142,7 +161,7 @@ def generate_name(novelname, author, chaptername, book, chapter_s, chapter_e):
 			file_name = novelname + " - {} - {}-{}".format(book, chapter_s, chapter_e)
 	return author + ' - ' + file_name
 
-def generate(html_files, novelname, author, chaptername, book, chapter_s, chapter_e):
+def generate(html_files, novelname, author, chaptername, book, chapter_s, chapter_e, suplementList):
 	""" Saves downloaded xhtml files into the epub format while also
 	generating the for the epub format nesessary container, table of contents,
 	mimetype and content files
@@ -239,6 +258,8 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	file3.close()
 	
 	epub.write(storage_dir + os.sep + "tmp/common.css", "OEBPS/common.css")
+	for img in suplementList:
+		epub.write(storage_dir + os.sep + "tmp/"+img, "OEBPS/images/"+img)
 	try: os.remove(storage_dir + os.sep + "tmp/common.css")
 	except: {}
 	epub.write("./ressources/fonts/"+font+"/Regular.ttf", "OEBPS/Regular.ttf")
@@ -250,6 +271,9 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	# removes all the temporary files
 	for x in html_files:
 		try: os.remove(x)
+		except: {}
+	for img in suplementList:
+		try: os.remove(storage_dir + os.sep + "tmp/"+img)
 		except: {}
 		
 def unicodeToHTMLEntities(text):

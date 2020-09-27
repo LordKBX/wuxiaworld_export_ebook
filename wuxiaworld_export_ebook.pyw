@@ -377,7 +377,7 @@ def preview():
 		# Not an HTTP-specific error (e.g. connection refused)
 		print('URL: {}, URLError: {}'.format(bulk_list[x]['url'], e.reason))
 	else:
-		getify.clean(filename, filenameOut, novel)
+		getify.clean(filename, filenameOut, 'https://www.wuxiaworld.com')
 		filenameOut += ".xhtml"
 		text_toc = getify.generate_toc([filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut,filenameOut], novel)
 		file3  = open(storage_dir+"/tmp/toc.xhtml", "w")
@@ -417,6 +417,7 @@ def generate_mid(progress_callback):
 	msg1 = ''
 	msg2 = ''
 	msg3 = ''
+	suplementList = []
 	bulk_list = []
 	file_list = []
 	if export_full == 0:
@@ -469,11 +470,11 @@ def generate_mid(progress_callback):
 				# Not an HTTP-specific error (e.g. connection refused)
 				print('URL: {}, URLError: {}'.format(bulk_list[x]['url'], e.reason))
 			else:
-				getify.clean(filename, filenameOut, novel)
+				suplementList += getify.clean(filename, filenameOut, novel)
 				file_list.append(filenameOut + ".xhtml")
 				
 		progress_callback.emit(['Generate epub {}'.format(getify.generate_name(novel, data_novel['autor'], 'ch-', book, 1, len(file_list))), 90])
-		getify.generate(file_list, novel, data_novel['autor'], 'ch-', book, 1, len(file_list))
+		getify.generate(file_list, novel, data_novel['autor'], 'ch-', book, 1, len(file_list), suplementList)
 	else:
 		if export_mode == 0:
 			bookList = sorted(data_novel['books'])
@@ -504,10 +505,10 @@ def generate_mid(progress_callback):
 						# Not an HTTP-specific error (e.g. connection refused)
 						print('URL: {}, URLError: {}'.format(bulk_list[x]['url'], e.reason))
 					else:
-						getify.clean(filename, filenameOut, novel)
+						suplementList += getify.clean(filename, filenameOut, novel)
 						file_list.append(filenameOut + ".xhtml")
 				progress_callback.emit(['generating {} => {}'.format(tome, getify.generate_name(novel, data_novel['autor'], 'ch-', tome, None, None)), pos])
-				getify.generate(file_list, novel, data_novel['autor'], 'ch-', tome, None, None)
+				getify.generate(file_list, novel, data_novel['autor'], 'ch-', tome, None, None, suplementList)
 		else:  # Mode Alternatif
 			step = 90 / len(data_novel['alt_books'])
 			pos = 5
@@ -534,10 +535,10 @@ def generate_mid(progress_callback):
 						# Not an HTTP-specific error (e.g. connection refused)
 						print('URL: {}, URLError: {}'.format(bulk_list[x]['url'], e.reason))
 					else:
-						getify.clean(filename, filenameOut, novel)
+						suplementList += getify.clean(filename, filenameOut, novel)
 						file_list.append(filenameOut + ".xhtml")
 				progress_callback.emit(['generating {} => {}'.format(block['title'], getify.generate_name(novel, data_novel['autor'], 'ch-', block['title'], None, None)), pos])
-				getify.generate(file_list, novel, data_novel['autor'], 'ch-', block['title'], None, None)
+				getify.generate(file_list, novel, data_novel['autor'], 'ch-', block['title'], None, None, suplementList)
 
 def generate_end():
 	global dialog, app, novel, cursor, data_novel, generating
@@ -558,7 +559,7 @@ def generate_end():
 		dialog.endingChapterSelector.setEnabled(True)
 	generating = False
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-	subprocess.Popen('explorer "' + os.path.dirname(os.path.realpath(__file__)) + os.sep + 'export' + '"')
+	subprocess.Popen('explorer "' + storage_dir + os.sep + 'export' + '"')
 
 def clean_folder(folder):
 	for the_file in os.listdir(folder):

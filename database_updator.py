@@ -176,7 +176,7 @@ def insert_wuxiaworld_novel(name, url):
 			fileHandle1.close();
 			os.remove(filename_wuxiaworld)
 			
-		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited,translator,synopsis,source) VALUES(?,?,?,?,?,?,?,?)", (name, url, autors, img, limit, translator, synopsis, 'wuxiaworld.com'))
+		cursor.execute("INSERT INTO Information(NovelName,link,autor,cover,limited,translator,synopsis,source) VALUES(?,?,?,?,?,?,?,?)", (name, url, autors, img, 0, translator, synopsis, 'wuxiaworld.com'))
 		conn.commit()
 
 def start():
