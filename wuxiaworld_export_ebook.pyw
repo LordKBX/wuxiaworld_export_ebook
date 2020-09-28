@@ -8,6 +8,12 @@ from urllib.error import HTTPError, URLError
 import time
 import subprocess
 from PyQt5 import QtCore, QtGui, QtWidgets
+
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.uic import *
+
 if os.name == 'nt':
 	import ctypes
 
@@ -32,6 +38,7 @@ styleUpdateGrey = "background-color:#CCCCCC;color:#000000;"
 styleUpdateGreen = 'background-color:#55AA00;color: #ffffff;'
 threadpool = None
 outdatedScript = False
+ebookFormat = 3
 
 class WorkerSignals(QtCore.QObject):
 	"""
@@ -388,9 +395,25 @@ def preview():
 		command1 = subprocess.Popen([sys.executable, "./css_editor/launch.py", storage_dir])
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
 
+def msgbtn(i):
+	print("Button pressed is:{}".format(i.text()))
+
 def generate():
-	global dialog, novel, data_novel, generating, threadpool
+	global dialog, novel, data_novel, generating, threadpool, ebookFormat
 	if generating is True: return
+	
+	msg = QtWidgets.QMessageBox()
+	msg.setIcon(QtWidgets.QMessageBox.Information)
+	msg.setWindowTitle("Select output file format")
+	msg.setText("Please select output file format")
+	msg.addButton(QtWidgets.QPushButton('Epub v2.0'), QtWidgets.QMessageBox.NoRole)
+	msg.addButton(QtWidgets.QPushButton('Epub v3.0'), QtWidgets.QMessageBox.NoRole)
+	
+	retval = msg.exec_()
+	if retval == 0: ebookFormat = 2
+	if retval == 1: ebookFormat = 3
+	print("Format Epub v{}.0".format(ebookFormat))
+	
 	if novel == '': return
 	lockInterface(True)
 	app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
@@ -410,6 +433,7 @@ def generate():
 
 def generate_mid(progress_callback):
 	global dialog, novel, data_novel
+	
 	export_mode = dialog.modeSlider.value()
 	export_full = dialog.totalExportSlider.value()
 	book = dialog.bookSelector.currentText()
@@ -478,7 +502,7 @@ def generate_mid(progress_callback):
 				file_list.append(filenameOut + ".xhtml")
 				
 		progress_callback.emit(['Generate epub {}'.format(getify.generate_name(novel, data_novel['autor'], 'ch-', book, 1, len(file_list))), 90])
-		getify.generate(file_list, novel, data_novel['autor'], 'ch-', book, 1, len(file_list), suplementList)
+		getify.generate(file_list, novel, data_novel['autor'], 'ch-', book, 1, len(file_list), suplementList, ebookFormat)
 	else:
 		if export_mode == 0:
 			bookList = sorted(data_novel['books'])
@@ -512,7 +536,7 @@ def generate_mid(progress_callback):
 						suplementList += getify.clean(filename, filenameOut, novel)
 						file_list.append(filenameOut + ".xhtml")
 				progress_callback.emit(['generating {} => {}'.format(tome, getify.generate_name(novel, data_novel['autor'], 'ch-', tome, None, None)), pos])
-				getify.generate(file_list, novel, data_novel['autor'], 'ch-', tome, None, None, suplementList)
+				getify.generate(file_list, novel, data_novel['autor'], 'ch-', tome, None, None, suplementList, ebookFormat)
 		else:  # Mode Alternatif
 			step = 90 / len(data_novel['alt_books'])
 			pos = 5
@@ -542,7 +566,7 @@ def generate_mid(progress_callback):
 						suplementList += getify.clean(filename, filenameOut, novel)
 						file_list.append(filenameOut + ".xhtml")
 				progress_callback.emit(['generating {} => {}'.format(block['title'], getify.generate_name(novel, data_novel['autor'], 'ch-', block['title'], None, None)), pos])
-				getify.generate(file_list, novel, data_novel['autor'], 'ch-', block['title'], None, None, suplementList)
+				getify.generate(file_list, novel, data_novel['autor'], 'ch-', block['title'], None, None, suplementList, ebookFormat)
 
 def generate_end():
 	global dialog, app, novel, cursor, data_novel, generating

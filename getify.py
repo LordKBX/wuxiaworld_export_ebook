@@ -165,7 +165,7 @@ def generate_name(novelname, author, chaptername, book, chapter_s, chapter_e):
 			file_name = novelname + " - {} - {}-{}".format(book, chapter_s, chapter_e)
 	return author + ' - ' + file_name
 
-def generate(html_files, novelname, author, chaptername, book, chapter_s, chapter_e, suplementList):
+def generate(html_files, novelname, author, chaptername, book, chapter_s, chapter_e, suplementList, ebookFormat = 2):
 	""" Saves downloaded xhtml files into the epub format while also
 	generating the for the epub format nesessary container, table of contents,
 	mimetype and content files
@@ -176,16 +176,13 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	storage_dir = current_dir
 	if os.name == 'nt':
 		storage_dir = os.path.expanduser("~") + os.sep + "wuxiaworld_export_ebook"
-	if os.path.isdir(storage_dir + os.sep + 'export') is False:
-		os.mkdir(storage_dir + os.sep + 'export')
+	if os.path.isdir(storage_dir + os.sep + 'export') is False: os.mkdir(storage_dir + os.sep + 'export')
 	file_name = ''
-	if book is None:
-		file_name = novelname + " - {}-{}".format(chapter_s, chapter_e)
+	if book is None: file_name = novelname + " - {}-{}".format(chapter_s, chapter_e)
 	else:
-		if chapter_s is None:
-			file_name = novelname + " - {}".format(book)
-		else:
-			file_name = novelname + " - {} - {}-{}".format(book, chapter_s, chapter_e)
+		if chapter_s is None: file_name = novelname + " - {}".format(book)
+		else: file_name = novelname + " - {} - {}-{}".format(book, chapter_s, chapter_e)
+	
 	file_name = file_name.replace(':', ',')
 	epub = zipfile.ZipFile(storage_dir + os.sep + "export/" + author + ' - ' + file_name + ".epub", "w")
 	# The first file must be named "mimetype"
@@ -195,10 +192,12 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	We need an index file, that lists all other HTML files
 	This index file itself is referenced in the META_INF/container.xml file
 	"""
+	opfFile = 'OEBPS/Content.opf'
+	if ebookFormat >= 3: opfFile = 'metadata.opf'
 	epub.writestr("META-INF/container.xml", '<container version="1.0" \
 		xmlns="urn:oasis:names:tc:opendocument:xmlns:container">\
 		<rootfiles>\
-			<rootfile full-path="OEBPS/Content.opf" media-type="application/oebps-package+xml"/>\
+			<rootfile full-path="'+ opfFile +'" media-type="application/oebps-package+xml"/>\
 		</rootfiles>\
 	</container>')
 	# The index file is another XML file, living per convention
@@ -207,49 +206,83 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	file1 = open("./ressources/loading_fonts.txt", "r")
 	font = file1.read()
 	file1.close()
-	index_tpl = '''<package version="3.1"
-	xmlns="http://www.idpf.org/2007/opf" unique-identifier="''' + uniqueid + '''">
-			<metadata>
-				%(metadata)s
-			</metadata>
-			<manifest>
-				%(manifest)s
-				<item href="cover.png" id="cover" media-type="image/png" properties="cover-image"/>
-				<item href="common.css" id="commoncss" media-type="text/css"/>
-				<item href="Regular.ttf" id="id1" media-type="application/font-sfnt"/>
-				<item href="Bold.ttf" id="id1" media-type="application/font-sfnt"/>
-				<item href="Bold-Italic.ttf" id="id1" media-type="application/font-sfnt"/>
-				<item href="Italic.ttf" id="id1" media-type="application/font-sfnt"/>
-			</manifest>
-			<spine>
-				<itemref idref="toc"/>
-				%(spine)s
-			</spine>
-		</package>'''
+	fonsup = ''
+	if ebookFormat >= 3: fonsup = 'font/'
+	spinesup = ''
+	if ebookFormat >= 3: spinesup = 'toc="ncx"'
+	spinefirst = 'toc'
+	if ebookFormat >= 3: spinefirst = 'start'
+	index_tpl = '<?xml version=\'1.0\' encoding=\'utf-8\'?>\
+	<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="uuid_id" version="2.0">\
+			<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">\
+				%(metadata)s\
+			</metadata>\
+			<manifest>\
+				%(manifest)s\
+				<item href="cover.png" id="cover" media-type="image/png" properties="cover-image"/>\
+				<item href="common.css" id="commoncss" media-type="text/css"/>\
+				<item href="'+fonsup +'Regular.ttf" id="font1" media-type="application/x-font-truetype"/>\
+				<item href="'+fonsup +'Bold.ttf" id="font2" media-type="application/x-font-truetype"/>\
+				<item href="'+fonsup +'Bold-Italic.ttf" id="font3" media-type="application/x-font-truetype"/>\
+				<item href="'+fonsup +'Italic.ttf" id="font4" media-type="application/x-font-truetype"/>\
+			</manifest>\
+			<spine '+ spinesup +'>\
+				<itemref idref="' + spinefirst + '"/>\
+				%(spine)s\
+			</spine>\
+		</package>'
 	manifest = ""
+	toc_manifest = ""
 	spine = ""
+	navPoints = ""
 	metadata = '''<dc:title xmlns:dc="http://purl.org/dc/elements/1.1/">%(novelname)s</dc:title>
-		<dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:ns0="http://www.idpf.org/2007/opf" ns0:role="aut" 
-			ns0:file-as="Unbekannt">%(author)s</dc:creator>
+		<dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:ns0="http://www.idpf.org/2007/opf" ns0:role="aut"  ns0:file-as="%(author)s">%(author)s</dc:creator>
 		<dc:language xmlns:dc="http://purl.org/dc/elements/1.1/">en</dc:language>
-		<dc:identifier xmlns:dc="http://purl.org/dc/elements/1.1/">%(uuid)s"</dc:identifier>''' % {
-		"novelname": file_name, "author": author, "uuid": uniqueid}
-	toc_manifest = '<item href="toc.xhtml" id="toc" properties="nav" media-type="application/xhtml+xml"/>'
+		<dc:identifier opf:scheme="uuid" id="uuid_id">%(uuid)s</dc:identifier>
+		<dc:contributor opf:file-as="Wuxiaworld export Ebook" opf:role="bkp">Wuxiaworld export Ebook (2.x) [https://github.com/LordKBX/wuxiaworld_export_ebook]</dc:contributor>''' % { "novelname": file_name, "author": author, "uuid": uniqueid }
+	if ebookFormat >= 3: 
+		manifest += '<item href="start.xhtml" id="start" media-type="application/xhtml+xml"/>'
+		toc_manifest += '<item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml"/>'
+	else: 
+		toc_manifest = '<item href="toc.xhtml" id="toc" properties="nav" media-type="application/xhtml+xml"/>'
 	# Write each HTML file to the ebook, collect information for the index
 	for i, html in enumerate(html_files):
 		basename = os.path.basename(html)
 		manifest += '<item id="file_%s" href="%s" media-type="application/xhtml+xml"/>' % (i+1, basename)
 		spine += '<itemref idref="file_%s" />' % (i+1)
-		epub.write(html, "OEBPS/"+basename)
+		navPoints += '<navPoint id="num_%(id)s" playOrder="%(id)s"> <navLabel><text>Chapter %(num)s</text></navLabel> <content src="%(file)s"/> </navPoint>' % { "id": i+2, "num": i+1, "file": basename  }
+		if ebookFormat >= 3: epub.write(html, basename)
+		else: epub.write(html, "OEBPS/"+basename)
 	# Finally, write the index
-	epub.writestr("OEBPS/Content.opf", index_tpl % {
-		"metadata": metadata,
-		"manifest": manifest + toc_manifest,
-		"spine": spine,
-		})
-	epub.writestr("OEBPS/toc.xhtml", generate_toc(html_files, novelname))
+	if ebookFormat >= 3: 
+		epub.writestr("metadata.opf", index_tpl % { "metadata": metadata, "manifest": manifest + toc_manifest, "spine": spine })
+		epub.writestr("start.xhtml", generate_toc(html_files, novelname))
+		epub.write(storage_dir + os.sep + "tmp/cover.png", "cover.png")
+		epub.writestr("toc.ncx", '''<?xml version='1.0' encoding='utf-8'?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="fr">
+  <head>
+    <meta content="%(uuid)s" name="dtb:uid"/>
+    <meta content="2" name="dtb:depth"/>
+    <meta content="Wuxiaworld export Ebook (2.x) [https://github.com/LordKBX/wuxiaworld_export_ebook]" name="dtb:generator"/>
+    <meta content="0" name="dtb:totalPageCount"/>
+    <meta content="0" name="dtb:maxPageNumber"/>
+  </head>
+  <docTitle>
+    <text>Inconnu(e)</text>
+  </docTitle>
+  <navMap>
+    <navPoint id="start" playOrder="1">
+      <navLabel><text>Index</text></navLabel>
+      <content src="start.xhtml"/>
+    </navPoint>
+	%(points)s
+  </navMap>
+</ncx>''' % { "uuid": uniqueid, "points":  navPoints })
+	else: 
+		epub.writestr("OEBPS/Content.opf", index_tpl % { "metadata": metadata, "manifest": manifest + toc_manifest, "spine": spine, })
+		epub.writestr("OEBPS/toc.xhtml", generate_toc(html_files, novelname))
+		epub.write(storage_dir + os.sep + "tmp/cover.png", "OEBPS/cover.png")
 	
-	epub.write(storage_dir + os.sep + "tmp/cover.png", "OEBPS/cover.png")
 	try: os.remove(storage_dir + os.sep + "tmp/cover.png")
 	except: {}
 	
@@ -258,19 +291,33 @@ def generate(html_files, novelname, author, chaptername, book, chapter_s, chapte
 	ccss = file2.read()
 	file2.close()
 	ccss = ccss.replace('<FONT>', font)
+	if ebookFormat >= 3:
+		ccss = ccss.replace('Regular.ttf', 'font/Regular.ttf')
+		ccss = ccss.replace('Bold-Italic.ttf', 'font/Bold-Italic.ttf')
+		ccss = ccss.replace('Bold.ttf', 'font/Bold.ttf')
+		ccss = ccss.replace('(Italic.ttf', '(font/Italic.ttf')
 	file3.write(ccss) 
 	file3.close()
 	
-	epub.write(storage_dir + os.sep + "tmp/common.css", "OEBPS/common.css")
-	for img in suplementList:
-		epub.write(storage_dir + os.sep + "tmp/"+img, "OEBPS/"+img)
+	if ebookFormat >= 3:
+		epub.write(storage_dir + os.sep + "tmp/common.css", "common.css")
+		for img in suplementList:
+			epub.write(storage_dir + os.sep + "tmp/"+img, img)
+		epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Regular.ttf", "font/Regular.ttf")
+		epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Bold.ttf", "font/Bold.ttf")
+		epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Bold-Italic.ttf", "font/Bold-Italic.ttf")
+		epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Italic.ttf", "font/Italic.ttf")
+	else:
+		epub.write(storage_dir + os.sep + "tmp/common.css", "OEBPS/common.css")
+		for img in suplementList:
+			epub.write(storage_dir + os.sep + "tmp/"+img, "OEBPS/"+img)
+		epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Regular.ttf", "OEBPS/Regular.ttf")
+		epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Bold.ttf", "OEBPS/Bold.ttf")
+		epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Bold-Italic.ttf", "OEBPS/Bold-Italic.ttf")
+		epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Italic.ttf", "OEBPS/Italic.ttf")
+	
 	try: os.remove(storage_dir + os.sep + "tmp/common.css")
 	except: {}
-	epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Regular.ttf", "OEBPS/Regular.ttf")
-	epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Bold.ttf", "OEBPS/Bold.ttf")
-	epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Bold-Italic.ttf", "OEBPS/Bold-Italic.ttf")
-	epub.write(storage_dir + os.sep + "ressources/fonts/"+font+"/Italic.ttf", "OEBPS/Italic.ttf")
-	
 	epub.close()
 	# removes all the temporary files
 	for x in html_files:
