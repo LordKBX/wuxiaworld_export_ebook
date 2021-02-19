@@ -75,7 +75,7 @@ def clean(file_name_in, file_name_out, start):
 	file.write("\n<body>")
 	file.write("\n<section>")
 	file.write("\n<h1>" + chapter_title + "</h1>")
-	file.write(str(soup).replace('<p></p>', '').replace('<p><br></p>', '').replace('<hr>', ''))
+	file.write(str(soup).replace('<p></p>', '').replace('<p><br/></p>', '').replace('<hr>', ''))
 	file.write("\n</section>")
 	file.write("\n</body>")
 	file.write("\n</html>")

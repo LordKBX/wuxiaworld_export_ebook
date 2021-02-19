@@ -3,3 +3,4 @@ beautifulsoup4>=4.6.0
 lxml>=4.1.1
 PyQt5>=5.15.1
 PyQtWebKit>=5.13.1
+pysqlite3>=0.4.3

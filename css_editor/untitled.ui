@@ -132,7 +132,7 @@ padding-left:5px;</string>
           <enum>QLayout::SetMaximumSize</enum>
          </property>
          <item>
-          <widget class="QWebView" name="webView">
+          <widget class="QWebView" name="webView" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -154,7 +154,7 @@ padding-left:5px;</string>
            <property name="styleSheet">
             <string notr="true">background-color: rgb(230, 230, 230);</string>
            </property>
-           <property name="url">
+           <property name="url" stdset="0">
             <url>
              <string>about:blank</string>
             </url>
