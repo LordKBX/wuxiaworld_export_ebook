@@ -69,7 +69,7 @@ or use the sctipt start.sh
 
 ## Keep in mind!
 
-If you have troube with missing text in some Novels use [the legacy console application](https://github.com/MrHaCkEr/Wuxiaworld-2-eBook/tree/legacy-console-application). This script scrapes differently and could resolve problems but may need to be modified to work.
+If you have trouble with missing text in some Novels use [the legacy console application](https://github.com/MrHaCkEr/Wuxiaworld-2-eBook/tree/legacy-console-application). This script scrapes differently and could resolve problems but may need to be modified to work.
 
 If you come across bug's or suggestion's for future updates don't hesitate to open up a "new Issue" in the issue tab
 
