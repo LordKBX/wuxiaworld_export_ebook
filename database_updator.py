@@ -18,6 +18,7 @@ from bs4 import BeautifulSoup
 import re
 import json
 import traceback
+import html
 
 parent = None
 conn = None
@@ -46,6 +47,11 @@ exception_names_list = {#for finding them on novelupdates.com
 		'Stellar Transformations': 'stellar-transformation',
 		'Overlord of Blood and Iron': 'the-overlord-of-blood-and-iron'
 	}
+		
+def unicodeToHTMLEntities(text):
+    """Converts unicode to HTML entities.  For example '&' becomes '&amp;'."""
+    text = html.escape(text, True).encode('ascii', 'xmlcharrefreplace').decode('ascii')
+    return text
 
 def download(link, file_name, ur_data=None):
 	url = urllib.request.Request(
@@ -277,8 +283,10 @@ def start():
 	# print(list_novel)
 	for novel in list_novel:
 		pos += step
-		if parent is not None: parent.emit(['Database Update, Processing "{}"'.format(novel['name']), int(pos)])
-		else: print('=> Processing:', novel['name'])
+		if parent is not None: 
+			parent.emit(['Database Update, Processing "{}"'.format(novel['name']), int(pos)])
+		else: 
+			print('=> Processing:', unicodeToHTMLEntities(novel['name']))
 		try:
 			insert_wuxiaworld_novel(novel['name'], novel['url'])
 		except:

@@ -5,6 +5,12 @@ import os.path
 import sys
 import copy
 from bs4 import BeautifulSoup
+import html
+		
+def unicodeToHTMLEntities(text):
+    """Converts unicode to HTML entities.  For example '&' becomes '&amp;'."""
+    text = html.escape(text, True).encode('ascii', 'xmlcharrefreplace').decode('ascii')
+    return text
 
 def import_data(link: str, novel: str, limited: int):
 	#link = 'https://www.wuxiaworld.com/novel/child-of-light'
@@ -45,7 +51,10 @@ def import_data(link: str, novel: str, limited: int):
 			# print(tab2)
 			last = '0'
 			for li in tab2:
-				print(li.find('a').contents[0]);
+				if os.name == 'nt':
+					print(unicodeToHTMLEntities(li.find('a').contents[0]));
+				else:
+					print(li.find('a').contents[0]);
 				if with_volume is False:
 					if limited == 1:
 						if len(books['Book 0']) >= 45: break
