@@ -109,12 +109,13 @@ def exitWindow():
 	window.close()
 
 def updateStatus(message:str, green=False):
-	global dialog, styleUpdateGrey, styleUpdateGreen
+	global dialog, styleUpdateGreen, styleUpdateGrey
 	try:
-		if green is True: dialog.statusLabel.setStyleSheet(interface.styleUpdateGreen)
-		else: dialog.statusLabel.setStyleSheet(interface.styleUpdateGrey)
+		if green is True: dialog.statusLabel.setStyleSheet(styleUpdateGreen)
+		else: dialog.statusLabel.setStyleSheet(styleUpdateGrey)
 		dialog.statusLabel.setText(message)
-	except:{}
+	except:
+		traceback.print_exc()
 
 def infoDialog(title, message, modal=True):
 	global app_icon
@@ -306,7 +307,10 @@ def export_mode_change():
 		else:
 			books_list = []
 			for block in data_novel['alt_books']:
-				books_list.append(block['title'])
+				if os.name == 'nt':
+					books_list.append(getify.unicodeToHTMLEntities(block['title']))
+				else:
+					books_list.append(block['title'])
 			dialog.bookSelector.clear()
 			dialog.bookSelector.addItems(books_list)
 			dialog.bookSelector.setEnabled(True)
@@ -332,12 +336,21 @@ def book_change():
 	if export_mode == 0:
 		if book in data_novel['books']:
 			for bl in data_novel['books'][book]:
-				chapters.append(bl['name'])
+				if os.name == 'nt':
+					chapters.append(getify.unicodeToHTMLEntities(bl['name']))
+				else:
+					chapters.append(bl['name'])
 	else:
 		for block in data_novel['alt_books']:
-			if block['title'] == book:
+			ti = block['title']
+			if os.name == 'nt':
+				ti = getify.unicodeToHTMLEntities(ti)
+			if ti == book:
 				for bl in block['chapters']:
-					chapters.append(bl['name'])
+					if os.name == 'nt':
+						chapters.append(getify.unicodeToHTMLEntities(bl['name']))
+					else:
+						chapters.append(bl['name'])
 	
 	dialog.startingChapterSelector.clear()
 	dialog.startingChapterSelector.addItems(chapters)
@@ -456,20 +469,20 @@ def generate_mid(progress_callback):
 				msg1 = book
 			good = False
 			for bok in data_novel['books'][book]:
-				if good is True or bok['name'] == chapter_start:
+				if good is True or getify.unicodeToHTMLEntities(bok['name']) == chapter_start:
 					good = True
 					bulk_list.append(bok)
-					if bok['name'] == chapter_end: good = False
+					if getify.unicodeToHTMLEntities(bok['name']) == chapter_end: good = False
 		else:  # Mode Alternatif
 			msg1 = book
 			for block in data_novel['alt_books']:
 				good = False
-				if block['title'] == book:
+				if getify.unicodeToHTMLEntities(block['title']) == book:
 					for bl in block['chapters']:
-						if good is True or bl['name'] == chapter_start:
+						if good is True or getify.unicodeToHTMLEntities(bl['name']) == chapter_start:
 							good = True
 							bulk_list.append(bl)
-							if bl['name'] == chapter_end: good = False
+							if getify.unicodeToHTMLEntities(bl['name']) == chapter_end: good = False
 				
 		bookName = chapter_start + "<br/>=><br/>" + chapter_end
 		

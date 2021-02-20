@@ -39,29 +39,33 @@ def clean(file_name_in, file_name_out, start):
 	chapter_title = soup.find(class_="caption clearfix")
 	chapter_title = chapter_title.find("h4")
 	chapter_title = chapter_title.text
-	soups = soup.find_all(class_="fr-view")
+	# soups = soup.find_all(class_="fr-view")
+	soups = soup.find(id="chapter-content")
 	for block in soups:
-		if block.has_attr('id'):
-			for script in soup.findAll('script'):
-				script.extract() 
+		try:
+			if block.name == 'script':
+				block.extract()
+				continue
 			cpt = 1
-			for img in block.findAll('img'):
-				tb = img['src'].split('?')[0].split('.')
+			if block.name == 'img':
+				tb = block['src'].split('?')[0].split('.')
 				imgext = tb[len(tb) - 1]
 				imgname = file_name_out + '_im{}'.format(cpt)+'.'+imgext
 				tb = imgname.split('/')
 				imgname2 = imgname.replace(tb[len(tb) - 1], 'images/'+tb[len(tb) - 1])
-				print(img['src'])
+				print(block['src'])
 				try:
-					
-					download(img['src'], imgname2)
-					img['src'] = 'images/'+tb[len(tb) - 1]
+					download(block['src'], imgname2)
+					block['src'] = 'images/'+tb[len(tb) - 1]
 					suplementList.append('images/'+tb[len(tb) - 1])
 				except:
 					traceback.print_exc()
 				cpt += 1
-			soup = block
-			break
+		except Exception:
+			""
+			# block.extract() 
+			
+	soup = soups
 	for a in soup.find_all("a"):
 		a.decompose()
 	raw.close()
@@ -364,4 +368,4 @@ def generate_toc(html_files, novel):
 			<a href="%s">%s</a>
 			</li>''' % (i, os.path.basename(html_files[i]), chapter)
 			
-	return toc_start % {"novelname": novel, "toc_mid": toc_mid, "toc_end": toc_end}
+	return toc_start % {"novelname": unicodeToHTMLEntities(novel), "toc_mid": toc_mid, "toc_end": toc_end}

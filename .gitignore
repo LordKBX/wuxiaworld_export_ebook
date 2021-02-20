@@ -2,3 +2,4 @@ __pycache__/
 export/
 tmp/
 check_version.txt
+*.autosave
