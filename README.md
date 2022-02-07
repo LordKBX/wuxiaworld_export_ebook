@@ -1,4 +1,9 @@
+# Project Closed
+## This project is now stoped because the website that serve of source now use an exclusive paid VIP access for the majority of the content preventing utilisation.
+### If someone is interested this project could serve of base for extracting content on another website
 
+# --------
+ 
 # wuxiaworld_export_ebook
 This Python script will download chapters from novels availaible on wuxiaworld.com and saves them into the .epub format.
 Based on a Fork of [Wuxiaworld-2-eBook](https://github.com/MakeYourLifeEasier/Wuxiaworld-2-eBook).
